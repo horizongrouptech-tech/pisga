@@ -47,6 +47,11 @@
   .navwallet{display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,#fff3e8,#ffe9d6);border:1px solid #f6c9a3;border-radius:999px;padding:6px 14px;font-weight:900;color:#8a4a1e;box-shadow:var(--shadow2)}
   .navwallet .c{font-size:15px}.navwallet small{font-weight:700;font-size:10px;color:#b06b3a}
   .navtier{display:flex;align-items:center;gap:6px;border-radius:999px;padding:6px 13px;font-weight:900;font-size:13px;box-shadow:var(--shadow2);border:1px solid rgba(0,0,0,.06)}
+  .navbell{position:relative;display:flex;align-items:center;justify-content:center;width:38px;height:38px;background:#fff;border:1px solid var(--line);border-radius:50%;cursor:pointer;font-size:18px;box-shadow:var(--shadow2)}
+  .navbell:hover{background:#f5f8fc}
+  .navbell .bdg{position:absolute;top:-4px;left:-4px;min-width:18px;height:18px;padding:0 4px;background:#e8607a;color:#fff;border-radius:999px;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+  @keyframes bellRing{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg)}40%{transform:rotate(12deg)}60%{transform:rotate(-8deg)}80%{transform:rotate(6deg)}}
+  .navbell.ring{animation:bellRing .7s ease}
   .navtier .em{font-size:15px}
   .whoami{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 12px;cursor:pointer;box-shadow:var(--shadow2)}
   .whoami .av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:900;color:#fff;font-size:13px}
@@ -319,6 +324,7 @@
   <button class="tab" data-view="prizes">הפרסים</button>
   <button class="tab" data-view="rules">איך זה עובד</button>
   </div>
+  <div class="navbell" id="navBell" onclick="openBell()" style="display:none" title="התראות ועדכונים">🔔<span class="bdg" id="bellBadge" style="display:none">0</span></div>
   <div class="navtier" id="navTier" style="display:none"></div>
   <div class="navwallet" id="navWallet" style="display:none"><span>💰</span><span class="c" id="navWalletC">0</span><small>נק'</small></div>
   <div class="whoami" id="whoami" onclick="askLogout()"><span class="av" id="waAv"></span><span class="nm" id="waNm"></span><span class="muted" style="font-size:11px">יציאה</span></div>
@@ -460,7 +466,7 @@ function nextEx(){exIdx++;renderExCard();}
 const $=s=>document.querySelector(s);
 function load(){for(const k of ["ascend6","ascend6_bak","ascend6_prev"]){try{const s=localStorage.getItem(k);if(s&&s.length>20){const o=JSON.parse(s);if(o&&(o.users||o.logs))return o;}}catch(e){}}return{};}
 function saveLocal(){const cur=load();if(cur.seq&&cur.seq>state.seq)state.seq=cur.seq;
-  const blob=JSON.stringify({users:USERS,logs:state.logs,redemp:state.redemp,cashLedger:state.cashLedger,seq:state.seq,me:state.me&&state.me.id,savedAt:Date.now()});
+  const blob=JSON.stringify({users:USERS,logs:state.logs,redemp:state.redemp,cashLedger:state.cashLedger,anns:state.anns,seq:state.seq,me:state.me&&state.me.id,savedAt:Date.now()});
   try{const prev=localStorage.getItem("ascend6");if(prev&&prev.length>20)localStorage.setItem("ascend6_prev",prev);localStorage.setItem("ascend6",blob);localStorage.setItem("ascend6_bak",blob);}catch(e){}}
 function save(){saveLocal();schedulePush();}
 /* ===== סנכרון Supabase - מקור אמת משותף לכל המכשירים; localStorage = cache + fallback ===== */
@@ -470,16 +476,17 @@ const SB_H={"apikey":SUPA_ANON,"Authorization":"Bearer "+SUPA_ANON,"Content-Type
 let sbOnline=false,pushPending=false,pushTimer=null,pulling=false,curView="dash";
 function sbGet(t){return fetch(SUPA_URL+"/rest/v1/"+t+"?select=*",{headers:SB_H}).then(r=>r.ok?r.json():Promise.reject(r.status));}
 function sbUp(t,rows){return rows.length?fetch(SUPA_URL+"/rest/v1/"+t,{method:"POST",headers:Object.assign({},SB_H,{"Prefer":"resolution=merge-duplicates,return=minimal"}),body:JSON.stringify(rows)}).then(r=>{if(!r.ok)throw r.status}):Promise.resolve();}
-function stateRows(){const users=USERS.map(u=>({id:u.id,data:u}));const logs=[];Object.keys(state.logs||{}).forEach(uid=>(state.logs[uid]||[]).forEach(l=>logs.push({id:l.id,data:Object.assign({},l,{user_id:uid})})));const reds=[];Object.keys(state.redemp||{}).forEach(uid=>(state.redemp[uid]||[]).forEach(r=>reds.push({id:r.id,data:Object.assign({},r,{user_id:uid})})));const cash=(state.cashLedger||[]).map(r=>({id:r.id,data:r}));return{users,logs,reds,cash};}
-async function pushRemote(){const R=stateRows();try{await Promise.all([sbUp("users",R.users),sbUp("logs",R.logs),sbUp("redemptions",R.reds),sbUp("cash_ledger",R.cash),sbUp("meta",[{k:"seq",v:state.seq}])]);sbOnline=true;}catch(e){}pushPending=false;}
+function stateRows(){const users=USERS.map(u=>({id:u.id,data:u}));const logs=[];Object.keys(state.logs||{}).forEach(uid=>(state.logs[uid]||[]).forEach(l=>logs.push({id:l.id,data:Object.assign({},l,{user_id:uid})})));const reds=[];Object.keys(state.redemp||{}).forEach(uid=>(state.redemp[uid]||[]).forEach(r=>reds.push({id:r.id,data:Object.assign({},r,{user_id:uid})})));const cash=(state.cashLedger||[]).map(r=>({id:r.id,data:r}));const anns=(state.anns||[]).map(a=>({id:a.id,data:a}));return{users,logs,reds,cash,anns};}
+async function pushRemote(){const R=stateRows();try{await Promise.all([sbUp("users",R.users),sbUp("logs",R.logs),sbUp("redemptions",R.reds),sbUp("cash_ledger",R.cash),sbUp("announcements",R.anns),sbUp("meta",[{k:"seq",v:state.seq}])]);sbOnline=true;}catch(e){}pushPending=false;}
 function schedulePush(){pushPending=true;clearTimeout(pushTimer);pushTimer=setTimeout(pushRemote,350);}
-function mergeRows(u,lg,rd,ch,mseq){USERS=SEED.map((s,i)=>Object.assign({},s,{color:AV[i%AV.length]}));u.map(r=>r.data).forEach(su=>{const ex=USERS.find(x=>x.id===su.id);if(ex)Object.assign(ex,su);else USERS.push(su);});
+function mergeRows(u,lg,rd,ch,an,mseq){USERS=SEED.map((s,i)=>Object.assign({},s,{color:AV[i%AV.length]}));u.map(r=>r.data).forEach(su=>{const ex=USERS.find(x=>x.id===su.id);if(ex)Object.assign(ex,su);else USERS.push(su);});
   const lb={};lg.forEach(r=>lb[r.id]=Object.assign({},r.data));Object.keys(state.logs||{}).forEach(uid=>(state.logs[uid]||[]).forEach(l=>{if(!lb[l.id])lb[l.id]=Object.assign({},l,{user_id:uid})}));const nl={};Object.values(lb).forEach(l=>{(nl[l.user_id]=nl[l.user_id]||[]).push(l)});Object.keys(nl).forEach(k=>nl[k].sort((a,b)=>a.id-b.id));state.logs=nl;
   const rb={};rd.forEach(r=>rb[r.id]=Object.assign({},r.data));Object.keys(state.redemp||{}).forEach(uid=>(state.redemp[uid]||[]).forEach(r=>{if(!rb[r.id])rb[r.id]=Object.assign({},r,{user_id:uid})}));const nr={};Object.values(rb).forEach(r=>{(nr[r.user_id]=nr[r.user_id]||[]).push(r)});state.redemp=nr;
   const cb={};ch.forEach(r=>cb[r.id]=Object.assign({},r.data));(state.cashLedger||[]).forEach(r=>{if(!cb[r.id])cb[r.id]=r});state.cashLedger=Object.values(cb);
-  let mx=mseq||0;Object.values(state.logs).forEach(a=>a.forEach(l=>{if(l.id>mx)mx=l.id}));Object.values(state.redemp).forEach(a=>a.forEach(r=>{if(r.id>mx)mx=r.id}));state.cashLedger.forEach(r=>{if(r.id>mx)mx=r.id});state.seq=Math.max(state.seq||0,mx);
+  const ab={};(an||[]).forEach(r=>ab[r.id]=Object.assign({},r.data));(state.anns||[]).forEach(a=>{if(!ab[a.id])ab[a.id]=a});state.anns=Object.values(ab).sort((a,b)=>b.id-a.id);
+  let mx=mseq||0;Object.values(state.logs).forEach(a=>a.forEach(l=>{if(l.id>mx)mx=l.id}));Object.values(state.redemp).forEach(a=>a.forEach(r=>{if(r.id>mx)mx=r.id}));state.cashLedger.forEach(r=>{if(r.id>mx)mx=r.id});state.anns.forEach(a=>{if(a.id>mx)mx=a.id});state.seq=Math.max(state.seq||0,mx);
   if(state.me){const f=USERS.find(x=>x.id===state.me.id);if(f)state.me=f;}}
-async function pullRemote(reRender){if(pulling||pushPending)return false;pulling=true;try{const a=await Promise.all([sbGet("users"),sbGet("logs"),sbGet("redemptions"),sbGet("cash_ledger"),sbGet("meta")]);sbOnline=true;if(!a[0].length){pulling=false;await pushRemote();return true;}mergeRows(a[0],a[1],a[2],a[3],(a[4].find(x=>x.k==="seq")||{}).v||0);saveLocal();if(reRender)refreshView();return true;}catch(e){sbOnline=false;return false;}finally{pulling=false;}}
+async function pullRemote(reRender){if(pulling||pushPending)return false;pulling=true;try{const a=await Promise.all([sbGet("users"),sbGet("logs"),sbGet("redemptions"),sbGet("cash_ledger"),sbGet("meta"),sbGet("announcements")]);sbOnline=true;if(!a[0].length){pulling=false;await pushRemote();return true;}mergeRows(a[0],a[1],a[2],a[3],a[5],(a[4].find(x=>x.k==="seq")||{}).v||0);saveLocal();updateBell();if(reRender)refreshView();maybeAnnounce();return true;}catch(e){sbOnline=false;return false;}finally{pulling=false;}}
 function refreshView(){if($("#modal").classList.contains("show"))return;if(!state.me||$("#app").style.display==="none"){if($("#login")&&$("#login").style.display!=="none")try{renderLogin()}catch(e){};return;}if(curView==="log")return;/* לא לשבש טופס תיעוד פתוח */try{({dash:renderDash,board:renderBoard,prizes:renderPrizes,rules:renderRules})[curView]();}catch(e){}}
 function exportData(){const blob=localStorage.getItem("ascend6")||"{}";const a=document.createElement("a");a.href="data:application/json;charset=utf-8,"+encodeURIComponent(blob);a.download="pisga-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();}
 function importData(ev){const f=ev.target.files&&ev.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);if(!o||!o.users)throw 0;if(!confirm("לשחזר את הגיבוי? הפעולה תדרוס את הנתונים במכשיר הזה."))return;localStorage.setItem("ascend6",rd.result);localStorage.setItem("ascend6_bak",rd.result);location.reload();}catch(e){alert("קובץ גיבוי לא תקין.");}};rd.readAsText(f);}
@@ -501,7 +508,7 @@ function deptScore(dep){return USERS.filter(u=>!u.admin&&!u.coach&&u.dept===dep)
 let USERS=[];
 (function init(){const saved=load();USERS=SEED.map((s,i)=>({...s,color:AV[i%AV.length]}));
   if(saved.users)saved.users.forEach(su=>{const u=USERS.find(x=>x.id===su.id);if(u)Object.assign(u,{career:su.career,balance:su.balance,stars:su.stars,streak:su.streak,refs:su.refs});else if(su&&su.id&&su.name&&!su.admin&&!su.coach)USERS.push({role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0,...su,color:su.color||AV[USERS.length%AV.length]});});
-  state.logs=saved.logs||{};state.redemp=saved.redemp||{};state.cashLedger=saved.cashLedger||[];let _mx=saved.seq||0;
+  state.logs=saved.logs||{};state.redemp=saved.redemp||{};state.cashLedger=saved.cashLedger||[];state.anns=saved.anns||[];let _mx=saved.seq||0;
   Object.values(state.logs).forEach(a=>(a||[]).forEach(l=>{if(l&&l.id>_mx)_mx=l.id}));Object.values(state.redemp).forEach(a=>(a||[]).forEach(r=>{if(r&&r.id>_mx)_mx=r.id}));state.seq=_mx;
   pullRemote(true);setInterval(()=>pullRemote(true),8000);/* Supabase: משיכה ראשונית + סנכרון כל 8 שניות */
   {const _ti=["🏔 מועדון הפסגה נפתח - <b>כולם מתחילים מאותה נקודה</b>","תוצאה מדידה ללקוח = <b>הניקוד הגבוה ביותר</b>","הבאת לקוח חדש מבחוץ? <b>+700 נק'</b>","כל הישג שמתועד ומאושר → נקודות לארנק","עלייה בדרגה = פרסים גדולים יותר נפתחים","מחלקה A מול מחלקה B - הרבעון נפתח <b>0:0</b>","פרס מחלקה מובילה רבעוני: <b>1,000 ₪</b>","הפסגה: טופ פלטינה + ארוחת בוקר עם אופק ואלירן"];$("#ticker").innerHTML=_ti.concat(_ti).map(t=>`<span>${t}</span>`).join("");}
@@ -554,7 +561,24 @@ function logout(){state.me=null;save();renderLogin();showSplash();}
 function askLogout(){if(confirm("לצאת מהחשבון של "+(state.me?state.me.name:"")+" ולחזור למסך הבחירה?"))logout();}
 function updateWallet(){const u=state.me,w=$("#navWallet"),tc=$("#navTier");
   if(u&&!u.admin){w.style.display="flex";$("#navWalletC").textContent=nf(u.balance);const t=userTier(u);tc.style.display="flex";tc.className="navtier "+t.metal;tc.innerHTML=`<span class="em">${t.ico}</span> ${t.n}`;}
-  else{w.style.display="none";tc.style.display="none";}}
+  else{w.style.display="none";tc.style.display="none";}
+  updateBell();}
+/* ===== התראות והזדמנויות (פעמון + פופאפ, מסתנכרן דרך השרת) ===== */
+function activeAnns(){return (state.anns||[]).filter(a=>a&&a.active!==false).sort((a,b)=>b.id-a.id);}
+function annSeen(){return state.me?(+localStorage.getItem("annSeen_"+state.me.id)||0):0;}
+function updateBell(){const b=$("#navBell"),bg=$("#bellBadge");if(!b)return;if(!state.me){b.style.display="none";return;}b.style.display="flex";const seen=annSeen();const n=activeAnns().filter(a=>a.id>seen).length;if(n>0){bg.style.display="flex";bg.textContent=n>9?"9+":n;b.classList.add("ring");setTimeout(()=>b.classList.remove("ring"),800);}else{bg.style.display="none";}}
+function openBell(){const list=activeAnns();if(state.me)localStorage.setItem("annSeen_"+state.me.id,list.length?list[0].id:0);updateBell();
+  $("#modalBody").innerHTML=`<div class="mm">🔔</div><h3>התראות ועדכונים</h3>`+(list.length?`<div style="text-align:right;max-height:60vh;overflow:auto;margin-top:8px">${list.map(a=>`<div style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#f7fafd"><div style="font-weight:900;font-size:15px;color:var(--ink)">${a.icon||"📣"} ${esc(a.title||"")}</div><div style="font-size:13.5px;color:var(--ink2);line-height:1.6;margin-top:5px">${esc(a.body||"")}</div>${a.cta?`<div style="margin-top:6px;font-size:12.5px;font-weight:800;color:var(--teal)">${esc(a.cta)}</div>`:""}<div class="muted" style="font-size:11px;margin-top:6px">${fmtDate(a.ts)}</div></div>`).join("")}</div>`:`<div class="sub">אין התראות כרגע. כשיהיה אירוע או הזדמנות מיוחדת - זה יופיע כאן.</div>`)+`<button class="skip" onclick="closeModal()">סגור</button>`;
+  $("#modal").classList.add("show");}
+function maybeAnnounce(){const u=state.me;if(!u||u.admin)return;if($("#modal").classList.contains("show"))return;const list=activeAnns();if(!list.length)return;const top=list[0];const shown=+localStorage.getItem("annPopup_"+u.id)||0;if(top.id<=shown)return;localStorage.setItem("annPopup_"+u.id,top.id);
+  $("#modalBody").innerHTML=`<div class="mm">${top.icon||"📣"}</div><h3>${esc(top.title||"התראה חדשה")}</h3><div class="sub">${esc(top.body||"")}</div>${top.cta?`<div style="font-size:13px;font-weight:800;color:var(--teal);margin-top:6px">${esc(top.cta)}</div>`:""}<button class="btn" style="max-width:230px;margin:10px auto 0" onclick="closeModal()">מגניב! 🚀</button><button class="skip" onclick="closeModal();openBell()">כל ההתראות</button>`;
+  $("#modal").classList.add("show");}
+function createAnnouncement(){if(!state.me||!state.me.admin)return;const title=($("#annTitle").value||"").trim();const body=($("#annBody").value||"").trim();const cta=($("#annCta").value||"").trim();const icon=($("#annIcon").value||"📣").trim();if(!title||!body){$("#annErr").style.display="block";return;}
+  (state.anns=state.anns||[]).unshift({id:++state.seq,title,body,cta,icon,ts:Date.now(),by:state.me.id,active:true});save();celebrate("📣 ההתראה נשלחה לכולם!");renderAdmin();}
+function delAnnouncement(id){if(!state.me||!state.me.admin)return;const a=(state.anns||[]).find(x=>x.id===id);if(a){a.active=false;save();renderAdmin();}}
+function grantBonus(){if(!state.me||!state.me.admin)return;const uid=$("#gbUser").value;const pts=Math.round(+($("#gbPts").value||0));const reason=($("#gbReason").value||"").trim();const u=USERS.find(x=>x.id===uid);if(!u||!pts||pts<=0||!reason){$("#gbErr").style.display="block";return;}
+  const l={id:++state.seq,type:"BONUS",short:"🎁 בונוס מיוחד",pts,vvs:true,client:"בונוס הנהלה",details:reason,val:"",color:"#9a6ff0",status:"approved",ts:Date.now(),tierAt:userTier(u).n,addedRefs:0,addedStreak:0,addedStars:0,approvedBy:state.me.id,approvedAt:Date.now()};
+  (state.logs[u.id]=state.logs[u.id]||[]).push(l);u.balance+=pts;u.career+=pts;save();celebrate("🎁 "+nf(pts)+" נק' בונוס ל"+u.name);renderAdmin();}
 
 document.querySelectorAll(".nav .tab").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
 function switchView(v){curView=v;document.querySelectorAll(".nav .tab").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
@@ -625,6 +649,8 @@ function renderHistory(u){const logs=state.logs[u.id]||[],total=logs.length;
   if(!total)return `<div class="muted" style="font-size:13px">עדיין אין הישגים בהיסטוריה. תעד את הראשון - הכל יישמר כאן ולא ניתן למחוק.</div>`;
   const appr=logs.filter(l=>l.status==="approved").reduce((a,b)=>a+b.pts,0),pend=logs.filter(l=>l.status==="pending").length,rej=logs.filter(l=>l.status==="rejected").length;
   const byType=TRIGGERS.map(t=>({t,items:logs.filter(l=>l.type===t.k).slice().reverse()})).filter(x=>x.items.length);
+  const trigKeys=TRIGGERS.map(t=>t.k),other=logs.filter(l=>!trigKeys.includes(l.type)).slice().reverse();
+  if(other.length)byType.push({t:{color:"#9a6ff0",label:"🎁 · בונוסים והטבות"},items:other});
   return `<div class="muted" style="font-size:12.5px;margin-bottom:10px">סה"כ <b>${total}</b> הישגים · ${nf(appr)} נק' מאושרות · ${pend} ממתינים · ${rej} נדחו. <b>לא ניתן למחוק</b> - רק אופק מאשר/דוחה.</div>
     ${byType.map(({t,items})=>{const sum=items.reduce((a,b)=>a+b.pts,0);
       return `<details class="htype"><summary><span class="sdot" style="background:${t.color}"></span><b>${tShort(t)}</b><span class="cnt">${items.length} הישגים · ${nf(sum)} נק'</span></summary>
@@ -646,6 +672,23 @@ function renderAdmin(){const players=USERS.filter(u=>!u.admin),pend=pendingList(
     <div class="muted" style="font-size:12.5px;margin-bottom:8px">הנתונים נשמרים אוטומטית + גיבוי כפול במכשיר. <b>מומלץ להוריד גיבוי קובץ מדי פעם</b> - כדי שלעולם לא נאבד נקודות. (הגיבוי במכשיר בלבד; לסנכרון בין מכשירים נצטרך שרת - ראה הודעה.)</div>
     <button class="btn" style="max-width:220px;background:#25b877" onclick="exportData()">📥 הורד גיבוי עכשיו</button>
     <label class="btn" style="max-width:220px;background:#8595ad;display:inline-block;text-align:center;cursor:pointer">📤 שחזר מגיבוי<input type="file" accept="application/json,.json" onchange="importData(event)" style="display:none"></label></div>
+  <div class="sec grid g2">
+    <div class="card"><div style="font-weight:900;margin-bottom:4px">📣 שלח התראה / הזדמנות לכולם</div>
+      <div class="muted" style="font-size:12.5px;margin-bottom:8px">קופץ לכולם כפופאפ + נשמר בפעמון. לאירוע מיוחד, הטבה, או הזדמנות לצבור.</div>
+      <div class="field"><label>אייקון + כותרת</label><div style="display:flex;gap:8px"><input id="annIcon" value="🎉" style="width:56px;text-align:center" maxlength="2"><input id="annTitle" placeholder="למשל: אירוע מיוחד השבוע!" style="flex:1"></div></div>
+      <div class="field"><label>הודעה</label><textarea id="annBody" rows="2" placeholder="מה ההזדמנות / ההטבה / מה צריך לעשות" style="width:100%;font:inherit;border:1px solid var(--line);border-radius:10px;padding:9px"></textarea></div>
+      <div class="field"><label>שורת פעולה <span class="muted">- אופציונלי</span></label><input id="annCta" placeholder="למשל: המשתתפים יקבלו 300 נק' בונוס"></div>
+      <div id="annErr" style="display:none;color:#d9534f;font-size:13px;font-weight:700;margin:4px 0">חובה כותרת והודעה.</div>
+      <button class="btn" onclick="createAnnouncement()">📣 שלח לכולם</button>
+      ${activeAnns().length?`<div class="muted" style="font-size:12px;margin-top:12px;font-weight:800">התראות פעילות:</div>${activeAnns().slice(0,4).map(a=>`<div style="display:flex;align-items:center;gap:6px;font-size:12.5px;margin-top:5px"><span>${a.icon||"📣"} ${esc(a.title)}</span><button onclick="delAnnouncement(${a.id})" style="margin-inline-start:auto;background:none;border:none;color:#d9534f;cursor:pointer;font-size:13px" title="הסר">✕</button></div>`).join("")}`:""}</div>
+    <div class="card"><div style="font-weight:900;margin-bottom:4px">🎁 הענקת בונוס נקודות</div>
+      <div class="muted" style="font-size:12.5px;margin-bottom:8px">נקודות מיוחדות למשתתף באירוע/הזדמנות - נכנס מיד (מאושר) עם סיבה.</div>
+      <div class="field"><label>למי</label><select id="gbUser">${USERS.filter(u=>!u.admin).map(u=>`<option value="${u.id}">${esc(u.name)}${u.coach?" (מנהל מחלקה)":""}</option>`).join("")}</select></div>
+      <div class="field"><label>כמה נקודות</label><input id="gbPts" type="number" inputmode="numeric" placeholder="למשל 300"></div>
+      <div class="field"><label>סיבה</label><input id="gbReason" placeholder="למשל: השתתפות באירוע X"></div>
+      <div id="gbErr" style="display:none;color:#d9534f;font-size:13px;font-weight:700;margin:4px 0">בחר משתמש, נקודות וסיבה.</div>
+      <button class="btn" onclick="grantBonus()">🎁 הענק בונוס</button></div>
+  </div>
   <div class="sec"><div class="kick">תור אישורים ${pend.length?`(${pend.length})`:""}</div>
     ${pend.length?`<div class="appr">${pend.map(({u,l})=>`<div class="row"><span class="av" style="background:${u.color}">${esc(initials(u.name))}</span>
       <div class="info"><b>${esc(u.name)}</b> · ${l.short}<div class="d">${esc(l.client||"בלי פרטים")}${l.details?" · "+esc(l.details):""}${l.val?" · "+esc(l.val)+" ₪":""}</div></div>
