@@ -3,7 +3,7 @@
 בסיס: https://horizongrouptech-tech.github.io/pisga/
 כל אחד נכנס ישר לממשק שלו:
 
-## אדמין (אישור הישגים) - PIN 12445678
+## אדמין (אישור הישגים) - PIN 124456
 - אופק:   https://horizongrouptech-tech.github.io/pisga/?u=ofek
 - אלירן:  https://horizongrouptech-tech.github.io/pisga/?u=eliran
 
