@@ -444,12 +444,31 @@ let exIdx=0;
 function renderExCard(){const t=TRIGGERS.find(x=>x.k==($("#lgType")&&$("#lgType").value));if(!t)return;const bank=exOf(t);if(!bank.length){$("#exCard")&&($("#exCard").style.display="none");return;}const el=$("#exCard");if(!el)return;el.style.display="block";const ex=bank[exIdx%bank.length];el.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-weight:900;font-size:13px">💡 השראה - מה נחשב ${tShort(t)}?</span><span class="muted" style="font-size:11.5px;margin-inline-start:auto">${(exIdx%bank.length)+1}/${bank.length}</span></div><div style="font-size:14px;color:var(--ink2);line-height:1.6">${esc(ex)}</div><button type="button" onclick="nextEx()" style="margin-top:8px;background:#eef2f8;border:1px solid var(--line,#d5deea);border-radius:9px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;color:var(--ink,#22405a)">עוד רעיון ←</button>`;}
 function nextEx(){exIdx++;renderExCard();}
 const $=s=>document.querySelector(s);
-function load(){for(const k of ["ascend5","ascend5_bak","ascend5_prev"]){try{const s=localStorage.getItem(k);if(s&&s.length>20){const o=JSON.parse(s);if(o&&(o.users||o.logs))return o;}}catch(e){}}return{};}
-function save(){const cur=load();if(cur.seq&&cur.seq>state.seq)state.seq=cur.seq;
-  const blob=JSON.stringify({users:USERS,logs:state.logs,redemp:state.redemp,seq:state.seq,me:state.me&&state.me.id,savedAt:Date.now()});
-  try{const prev=localStorage.getItem("ascend5");if(prev&&prev.length>20)localStorage.setItem("ascend5_prev",prev);localStorage.setItem("ascend5",blob);localStorage.setItem("ascend5_bak",blob);}catch(e){}}
-function exportData(){const blob=localStorage.getItem("ascend5")||"{}";const a=document.createElement("a");a.href="data:application/json;charset=utf-8,"+encodeURIComponent(blob);a.download="pisga-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();}
-function importData(ev){const f=ev.target.files&&ev.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);if(!o||!o.users)throw 0;if(!confirm("לשחזר את הגיבוי? הפעולה תדרוס את הנתונים במכשיר הזה."))return;localStorage.setItem("ascend5",rd.result);localStorage.setItem("ascend5_bak",rd.result);location.reload();}catch(e){alert("קובץ גיבוי לא תקין.");}};rd.readAsText(f);}
+function load(){for(const k of ["ascend6","ascend6_bak","ascend6_prev"]){try{const s=localStorage.getItem(k);if(s&&s.length>20){const o=JSON.parse(s);if(o&&(o.users||o.logs))return o;}}catch(e){}}return{};}
+function saveLocal(){const cur=load();if(cur.seq&&cur.seq>state.seq)state.seq=cur.seq;
+  const blob=JSON.stringify({users:USERS,logs:state.logs,redemp:state.redemp,cashLedger:state.cashLedger,seq:state.seq,me:state.me&&state.me.id,savedAt:Date.now()});
+  try{const prev=localStorage.getItem("ascend6");if(prev&&prev.length>20)localStorage.setItem("ascend6_prev",prev);localStorage.setItem("ascend6",blob);localStorage.setItem("ascend6_bak",blob);}catch(e){}}
+function save(){saveLocal();schedulePush();}
+/* ===== סנכרון Supabase - מקור אמת משותף לכל המכשירים; localStorage = cache + fallback ===== */
+const SUPA_URL="https://wkihovxyatxcqzakdbtb.supabase.co";
+const SUPA_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndraWhvdnh5YXR4Y3F6YWtkYnRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwODU1MDgsImV4cCI6MjA5ODY2MTUwOH0.LxnEv_THitcAMAN5FFo_nsucCIY-XyjdhXONPhDw4a4";
+const SB_H={"apikey":SUPA_ANON,"Authorization":"Bearer "+SUPA_ANON,"Content-Type":"application/json"};
+let sbOnline=false,pushPending=false,pushTimer=null,pulling=false,curView="dash";
+function sbGet(t){return fetch(SUPA_URL+"/rest/v1/"+t+"?select=*",{headers:SB_H}).then(r=>r.ok?r.json():Promise.reject(r.status));}
+function sbUp(t,rows){return rows.length?fetch(SUPA_URL+"/rest/v1/"+t,{method:"POST",headers:Object.assign({},SB_H,{"Prefer":"resolution=merge-duplicates,return=minimal"}),body:JSON.stringify(rows)}).then(r=>{if(!r.ok)throw r.status}):Promise.resolve();}
+function stateRows(){const users=USERS.map(u=>({id:u.id,data:u}));const logs=[];Object.keys(state.logs||{}).forEach(uid=>(state.logs[uid]||[]).forEach(l=>logs.push({id:l.id,data:Object.assign({},l,{user_id:uid})})));const reds=[];Object.keys(state.redemp||{}).forEach(uid=>(state.redemp[uid]||[]).forEach(r=>reds.push({id:r.id,data:Object.assign({},r,{user_id:uid})})));const cash=(state.cashLedger||[]).map(r=>({id:r.id,data:r}));return{users,logs,reds,cash};}
+async function pushRemote(){const R=stateRows();try{await Promise.all([sbUp("users",R.users),sbUp("logs",R.logs),sbUp("redemptions",R.reds),sbUp("cash_ledger",R.cash),sbUp("meta",[{k:"seq",v:state.seq}])]);sbOnline=true;}catch(e){}pushPending=false;}
+function schedulePush(){pushPending=true;clearTimeout(pushTimer);pushTimer=setTimeout(pushRemote,350);}
+function mergeRows(u,lg,rd,ch,mseq){USERS=SEED.map((s,i)=>Object.assign({},s,{color:AV[i%AV.length]}));u.map(r=>r.data).forEach(su=>{const ex=USERS.find(x=>x.id===su.id);if(ex)Object.assign(ex,su);else USERS.push(su);});
+  const lb={};lg.forEach(r=>lb[r.id]=Object.assign({},r.data));Object.keys(state.logs||{}).forEach(uid=>(state.logs[uid]||[]).forEach(l=>{if(!lb[l.id])lb[l.id]=Object.assign({},l,{user_id:uid})}));const nl={};Object.values(lb).forEach(l=>{(nl[l.user_id]=nl[l.user_id]||[]).push(l)});Object.keys(nl).forEach(k=>nl[k].sort((a,b)=>a.id-b.id));state.logs=nl;
+  const rb={};rd.forEach(r=>rb[r.id]=Object.assign({},r.data));Object.keys(state.redemp||{}).forEach(uid=>(state.redemp[uid]||[]).forEach(r=>{if(!rb[r.id])rb[r.id]=Object.assign({},r,{user_id:uid})}));const nr={};Object.values(rb).forEach(r=>{(nr[r.user_id]=nr[r.user_id]||[]).push(r)});state.redemp=nr;
+  const cb={};ch.forEach(r=>cb[r.id]=Object.assign({},r.data));(state.cashLedger||[]).forEach(r=>{if(!cb[r.id])cb[r.id]=r});state.cashLedger=Object.values(cb);
+  let mx=mseq||0;Object.values(state.logs).forEach(a=>a.forEach(l=>{if(l.id>mx)mx=l.id}));Object.values(state.redemp).forEach(a=>a.forEach(r=>{if(r.id>mx)mx=r.id}));state.cashLedger.forEach(r=>{if(r.id>mx)mx=r.id});state.seq=Math.max(state.seq||0,mx);
+  if(state.me){const f=USERS.find(x=>x.id===state.me.id);if(f)state.me=f;}}
+async function pullRemote(reRender){if(pulling||pushPending)return false;pulling=true;try{const a=await Promise.all([sbGet("users"),sbGet("logs"),sbGet("redemptions"),sbGet("cash_ledger"),sbGet("meta")]);sbOnline=true;if(!a[0].length){pulling=false;await pushRemote();return true;}mergeRows(a[0],a[1],a[2],a[3],(a[4].find(x=>x.k==="seq")||{}).v||0);saveLocal();if(reRender)refreshView();return true;}catch(e){sbOnline=false;return false;}finally{pulling=false;}}
+function refreshView(){if($("#modal").classList.contains("show"))return;if(!state.me||$("#app").style.display==="none"){if($("#login")&&$("#login").style.display!=="none")try{renderLogin()}catch(e){};return;}if(curView==="log")return;/* לא לשבש טופס תיעוד פתוח */try{({dash:renderDash,board:renderBoard,prizes:renderPrizes,rules:renderRules})[curView]();}catch(e){}}
+function exportData(){const blob=localStorage.getItem("ascend6")||"{}";const a=document.createElement("a");a.href="data:application/json;charset=utf-8,"+encodeURIComponent(blob);a.download="pisga-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();}
+function importData(ev){const f=ev.target.files&&ev.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);if(!o||!o.users)throw 0;if(!confirm("לשחזר את הגיבוי? הפעולה תדרוס את הנתונים במכשיר הזה."))return;localStorage.setItem("ascend6",rd.result);localStorage.setItem("ascend6_bak",rd.result);location.reload();}catch(e){alert("קובץ גיבוי לא תקין.");}};rd.readAsText(f);}
 function uid4(){try{return crypto.randomUUID()}catch(e){return"r"+Date.now().toString(36)+Math.round(performance.now()).toString(36)}}
 function syncFromStorage(u){const cur=load();if(!cur||!cur.users)return;const fu=cur.users.find(x=>x.id===u.id);if(fu&&typeof fu.balance==="number")u.balance=fu.balance;if(cur.redemp)state.redemp=cur.redemp;if(cur.logs)state.logs=cur.logs;if(cur.seq&&cur.seq>state.seq)state.seq=cur.seq;}
 function initials(n){return n.trim().split(" ")[0].slice(0,2)}
@@ -468,8 +487,9 @@ function deptScore(dep){return USERS.filter(u=>!u.admin&&!u.coach&&u.dept===dep)
 let USERS=[];
 (function init(){const saved=load();USERS=SEED.map((s,i)=>({...s,color:AV[i%AV.length]}));
   if(saved.users)saved.users.forEach(su=>{const u=USERS.find(x=>x.id===su.id);if(u)Object.assign(u,{career:su.career,balance:su.balance,stars:su.stars,streak:su.streak,refs:su.refs});else if(su&&su.id&&su.name&&!su.admin&&!su.coach)USERS.push({role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0,...su,color:su.color||AV[USERS.length%AV.length]});});
-  state.logs=saved.logs||{};state.redemp=saved.redemp||{};let _mx=saved.seq||0;
+  state.logs=saved.logs||{};state.redemp=saved.redemp||{};state.cashLedger=saved.cashLedger||[];let _mx=saved.seq||0;
   Object.values(state.logs).forEach(a=>(a||[]).forEach(l=>{if(l&&l.id>_mx)_mx=l.id}));Object.values(state.redemp).forEach(a=>(a||[]).forEach(r=>{if(r&&r.id>_mx)_mx=r.id}));state.seq=_mx;
+  pullRemote(true);setInterval(()=>pullRemote(true),8000);/* Supabase: משיכה ראשונית + סנכרון כל 8 שניות */
   {const _ti=["🏔 מועדון הפסגה נפתח - <b>כולם מתחילים מאותה נקודה</b>","תוצאה מדידה ללקוח = <b>הניקוד הגבוה ביותר</b>","הבאת לקוח חדש מבחוץ? <b>+700 נק'</b>","כל הישג שמתועד ומאושר → נקודות לארנק","עלייה בדרגה = פרסים גדולים יותר נפתחים","מחלקה A מול מחלקה B - הרבעון נפתח <b>0:0</b>","פרס מחלקה מובילה רבעוני: <b>1,000 ₪</b>","הפסגה: טופ פלטינה + ארוחת בוקר עם אופק ואלירן"];$("#ticker").innerHTML=_ti.concat(_ti).map(t=>`<span>${t}</span>`).join("");}
   const qp=new URLSearchParams(location.search).get("u");if(qp){const qu=USERS.find(x=>x.id===qp);if(qu)return enter(qu);}
   if(saved.me){const u=USERS.find(x=>x.id===saved.me);if(u)return enter(u)}renderLogin();})();
@@ -521,7 +541,7 @@ function updateWallet(){const u=state.me,w=$("#navWallet"),tc=$("#navTier");
   else{w.style.display="none";tc.style.display="none";}}
 
 document.querySelectorAll(".nav .tab").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
-function switchView(v){document.querySelectorAll(".nav .tab").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
+function switchView(v){curView=v;document.querySelectorAll(".nav .tab").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
   ["dash","log","board","prizes","rules"].forEach(x=>$("#v-"+x).classList.toggle("hidden",x!==v));
   updateWallet();({dash:renderDash,log:renderLog,board:renderBoard,prizes:renderPrizes,rules:renderRules})[v]();}
 
