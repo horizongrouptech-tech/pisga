@@ -329,6 +329,7 @@
     <div class="subnote">מי אתה? בחר את עצמך כדי להיכנס למסע שלך.<br>כל הישג שמתעדים עובר לאישור אופק (✓/✗) ואז נספר לדרגה, לארנק ולתחרות.</div>
     <div class="users" id="userGrid"></div>
     <div style="text-align:center;margin-top:18px"><button onclick="addUser()" style="background:#fff;border:1.5px dashed var(--line,#d5deea);color:var(--ink,#22405a);border-radius:12px;padding:11px 20px;font-size:14px;font-weight:800;cursor:pointer">＋ הוסף מנהל כספים</button></div>
+    <div style="text-align:center;margin-top:14px"><span onclick="adminGate()" style="color:var(--muted,#8595ad);font-size:13px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px">🔒 כניסת ניהול (אישור הישגים)</span></div>
   </div>
   <div id="app" style="display:none"><div id="v-dash"></div><div id="v-log" class="hidden"></div><div id="v-board" class="hidden"></div><div id="v-prizes" class="hidden"></div><div id="v-rules" class="hidden"></div></div>
 </div>
@@ -381,6 +382,7 @@ const TRIGGERS=[
   {k:"A",label:"A · תוצאה מדידה ללקוח",pts:500,color:"#d9a531",vvs:true,note:"הכי מתוגמל - זה הלב. תוצאה ללקוח מנצחת הכל. מוכפל בדרגה.",ex:["העלאת רווח/הכנסות רבעוני ב-25%+ (כמו Pitbender: 700K→1.6M)","הפחתת עלות מימון ב-50-60% בזכות איחוד הלוואות","שיפור תזרים מדיד ומאומת בפלאסטו"]},
   {k:"G_newclient",label:"G · לקוח חדש שהבאת בעצמך (מחוץ להורייזן)",pts:700,color:"#25b877",vvs:true,note:"ערך שיא - הבאת עסק חדש מהיוזמה/הרשת שלך, לא מליד שיווקי. הכנסה חדשה לחברה. מוכפל בדרגה.",ex:["בעל עסק שהבאת מהרשת שלך ונסגר לריטיינר","לקוח חדש שיזמת בעצמך - לא הגיע מהשיווק של הורייזן"]},
   {k:"G_partner",label:"G · שותפות עסקית מעניינת שהבשלת להורייזן",pts:600,color:"#25b877",vvs:true,note:"פיתוח עסקי - חיבור/שותפות אסטרטגית שהבשלת (ספק, מפיץ, מקור deal-flow). מוכפל בדרגה.",ex:["חיבור לגורם שהפך לשותף / מקור לידים להורייזן","שיתוף פעולה שהבשיל למערכת יחסים עסקית"]},
+  {k:"G_book25",label:"G · חצית 25 לקוחות בניהול אישי",pts:700,color:"#25b877",vvs:true,note:"אבן דרך ענקית - ספר לקוחות מלא ובוגר בניהולך. מהתגמול הגבוה ביותר. פעם אחת בחציית הרף. מוכפל בדרגה.",ex:["הגעת ל-25 תיקי כספים פעילים בניהול אישי","עברת מ-24 ל-25 לקוחות בטיפול שוטף"]},
   {k:"A_p90",label:"A · לקוח עבר ציון 90 בפלאסטו",pts:500,color:"#d9a531",vvs:true,note:"בריאות פיננסית מעולה - רק ציון 90+ מקנה נקודות.",ex:["ציון הבריאות הפיננסי של הלקוח חצה 90","קפיצה מ-74 ל-91 תוך רבעון"]},
   {k:"B_case",label:"B · קייס סטאדי / כוכב Horizon",pts:350,color:"#2299b3",vvs:true,note:"נכס מותג - מזכה בכוכב. נשען על תוצאה מאומתת. מוכפל בדרגה.",ex:["קייס וואו של איחוד הלוואות ליבואן","טרנספורמציה של קמעונאי עם מספרים מאומתים בפלאסטו"]},
   {k:"B_ref",label:"B · הפניה שהומרה (פה-לאוזן)",pts:300,color:"#2299b3",vvs:true,note:"הלקוח החדש נכנס לתיק שלך = התיק גדל + נקודות.",ex:["לקוח מרוצה הפנה בעל עסק שנסגר לריטיינר מלא","הפניה מלקוח קיים שהומרה ללקוח משלם"]},
@@ -392,7 +394,7 @@ const TRIGGERS=[
 const MONTHS=["ינו","פבר","מרץ","אפר","מאי","יונ","יול","אוג","ספט","אוק","נוב","דצמ"];
 
 const state={me:null,logs:{},redemp:{},seq:0};
-const ADMIN_PIN="12445678";let pendingAdmin=null;
+const ADMIN_PIN="124456";let pendingAdmin=null;
 const $=s=>document.querySelector(s);
 function load(){try{return JSON.parse(localStorage.getItem("ascend5")||"{}")}catch(e){return{}}}
 function save(){const cur=load();if(cur.seq&&cur.seq>state.seq)state.seq=cur.seq;localStorage.setItem("ascend5",JSON.stringify({users:USERS,logs:state.logs,redemp:state.redemp,seq:state.seq,me:state.me&&state.me.id}))}
@@ -446,7 +448,9 @@ function showPin(){$("#modalBody").innerHTML=`<div class="mm">🔒</div><h3>כנ
   <button class="btn" style="max-width:210px;margin:4px auto 0" onclick="checkPin()">כניסה</button>
   <button class="skip" onclick="pendingAdmin=null;closeModal();renderLogin()">ביטול</button>`;
   $("#modal").classList.add("show");setTimeout(()=>{const i=$("#pinInput");if(i)i.focus();},120);}
-function checkPin(){const v=($("#pinInput").value||"").trim();if(v===ADMIN_PIN){const u=pendingAdmin;pendingAdmin=null;closeModal();doEnter(u);}else{$("#pinErr").textContent="קוד שגוי, נסה שוב";$("#pinInput").value="";$("#pinInput").focus();}}
+function adminGate(){pendingAdmin="__pick__";showPin();}
+function checkPin(){const v=($("#pinInput").value||"").trim();if(v===ADMIN_PIN){if(pendingAdmin==="__pick__"){adminPick();}else{const u=pendingAdmin;pendingAdmin=null;closeModal();doEnter(u);}}else{$("#pinErr").textContent="קוד שגוי, נסה שוב";$("#pinInput").value="";$("#pinInput").focus();}}
+function adminPick(){pendingAdmin=null;const admins=USERS.filter(u=>u.admin);$("#modalBody").innerHTML=`<div class="mm">👑</div><h3>מי נכנס לניהול?</h3><div class="sub">בחר את עצמך כדי להיכנס לאישורים.</div><div style="display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap">${admins.map(a=>`<div class="ucard" style="cursor:pointer;min-width:120px;margin:0" onclick="closeModal();doEnter(USERS.find(x=>x.id==='${a.id}'))"><div class="av" style="background:${a.color}">${esc(initials(a.name))}</div><div class="nm">${esc(a.name)}</div><div class="role">👑 אדמין</div></div>`).join("")}</div><button class="skip" style="margin-top:14px" onclick="closeModal();renderLogin()">ביטול</button>`;}
 function logout(){state.me=null;save();renderLogin();}
 function updateWallet(){const u=state.me,w=$("#navWallet"),tc=$("#navTier");
   if(u&&!u.admin){w.style.display="flex";$("#navWalletC").textContent=nf(u.balance);const t=userTier(u);tc.style.display="flex";tc.className="navtier "+t.metal;tc.innerHTML=`<span class="em">${t.ico}</span> ${t.n}`;}
