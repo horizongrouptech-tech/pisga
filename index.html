@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>מועדון הפסגה - המסע לפסגה</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#141b2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="מועדון הפסגה">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eef2f8; --card:#ffffff; --ink:#182036; --ink2:#3a4358; --muted:#71809c; --line:#e4e9f2;
+    --dark:#141b2e; --orange:#f6894f; --orange2:#fc9f67; --teal:#2299b3; --teal-l:#5ac6dc;
+    --good:#25b877; --gold:#d9a531; --blue:#5b83f0; --purple:#9a6ff0; --red:#e8607a;
+    --shadow:0 8px 30px rgba(30,45,80,.08); --shadow2:0 4px 16px rgba(30,45,80,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Heebo',-apple-system,'Segoe UI',Arial,sans-serif;background:
+     radial-gradient(900px 500px at 90% -5%,rgba(90,198,220,.18),transparent),
+     radial-gradient(700px 500px at 0% 0%,rgba(252,159,103,.14),transparent),var(--bg);
+     color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
+  .hidden{display:none!important}.muted{color:var(--muted)}
+
+  .ticker{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px solid var(--line);overflow:hidden;height:40px;display:flex;align-items:center;box-shadow:var(--shadow2)}
+  .ticker .live{flex:none;display:flex;align-items:center;gap:7px;padding:0 15px;font-weight:900;font-size:12px;color:var(--good);border-left:1px solid var(--line);height:100%}
+  .ticker .live .pdot{width:8px;height:8px;border-radius:50%;background:var(--good);animation:pulse 1.4s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(37,184,119,.5)}70%{box-shadow:0 0 0 7px rgba(37,184,119,0)}100%{box-shadow:0 0 0 0 rgba(37,184,119,0)}}
+  .ticker .track{display:flex;gap:34px;white-space:nowrap;animation:scroll 36s linear infinite;padding-right:34px}
+  .ticker .track b{color:var(--teal)} .ticker .track span{color:var(--ink2);font-size:13.5px;font-weight:600}
+  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  .nav{position:sticky;top:40px;z-index:30;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:11px 18px;flex-wrap:wrap}
+  .brand{font-weight:900;display:flex;align-items:center;gap:10px}
+  .brand .logo{width:30px;height:30px}.brand small{color:var(--teal);font-weight:800;font-size:11px}
+  .nav .spacer{margin-inline-start:auto}
+  .nav button.tab{background:transparent;border:none;color:var(--muted);font-family:inherit;font-weight:800;font-size:14px;padding:8px 12px;border-radius:10px;cursor:pointer}
+  .nav button.tab.active{background:var(--dark);color:#fff}
+  .navwallet{display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,#fff3e8,#ffe9d6);border:1px solid #f6c9a3;border-radius:999px;padding:6px 14px;font-weight:900;color:#8a4a1e;box-shadow:var(--shadow2)}
+  .navwallet .c{font-size:15px}.navwallet small{font-weight:700;font-size:10px;color:#b06b3a}
+  .navtier{display:flex;align-items:center;gap:6px;border-radius:999px;padding:6px 13px;font-weight:900;font-size:13px;box-shadow:var(--shadow2);border:1px solid rgba(0,0,0,.06)}
+  .navtier .em{font-size:15px}
+  .whoami{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 12px;cursor:pointer;box-shadow:var(--shadow2)}
+  .whoami .av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:900;color:#fff;font-size:13px}
+  .whoami .nm{font-weight:800;font-size:13px}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:22px 16px 90px}
+  h1{font-size:clamp(23px,4vw,32px);font-weight:900;letter-spacing:-.01em}
+  .kick{color:var(--teal);font-weight:900;font-size:12px;letter-spacing:.1em;margin-bottom:6px}
+  .sec{margin-top:26px}
+  .zonelbl{font-size:11.5px;font-weight:900;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin:32px 2px 2px;display:flex;align-items:center;gap:10px}
+  .zonelbl::after{content:"";flex:1;height:1px;background:var(--line)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:var(--shadow2)}
+
+  .login{max-width:900px;margin:26px auto;text-align:center}
+  .heroArt{position:relative;border-radius:24px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:26px}
+  .heroArt svg{display:block;width:100%;height:auto}
+  .heroArt .cap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse 60% 55% at center,rgba(255,255,255,.62),transparent 72%)}
+  .heroArt .cap h1{font-size:clamp(26px,5vw,44px);color:#12202f;text-shadow:0 1px 10px rgba(255,255,255,.85)}
+  .heroArt .cap p{color:#183042;font-weight:800;margin-top:8px;font-size:clamp(14px,2.4vw,18px);text-shadow:0 1px 8px rgba(255,255,255,.85)}
+  .login .subnote{color:var(--muted);font-size:13px;margin-bottom:22px}
+  .users{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:13px}
+  .ucard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;cursor:pointer;transition:.16s;text-align:center;box-shadow:var(--shadow2)}
+  .ucard:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--teal-l)}
+  .ucard .av{width:54px;height:54px;border-radius:50%;margin:0 auto 10px;display:grid;place-items:center;font-weight:900;color:#fff;font-size:21px;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+  .ucard .nm{font-weight:800}.ucard .role{font-size:12px;color:var(--muted);margin-top:2px}
+  .ucard .tiertag{margin-top:9px;font-size:11px;font-weight:900;display:inline-block;padding:3px 11px;border-radius:999px}
+
+  .metal-member{background:linear-gradient(135deg,#eaf0f8,#d6e0f0);color:#33405c}
+  .metal-silver{background:linear-gradient(135deg,#ffffff,#cbd4e2 48%,#eef2f8);color:#333c52}
+  .metal-gold{background:linear-gradient(135deg,#fdefba,#e0b53f 52%,#f7e08f);color:#54410f}
+  .metal-platinum{background:linear-gradient(135deg,#e2e9f4,#8496bd 52%,#c4d0e6);color:#20294a}
+  .metal-topplat{background:linear-gradient(135deg,#f4efe0,#b0a271 50%,#e6dfc4);color:#3c3512}
+  .metal-black{background:linear-gradient(135deg,#26304a,#0e1220);color:#e9c463}
+
+  .mcard{position:relative;border-radius:20px;padding:22px 24px;overflow:hidden;box-shadow:var(--shadow);min-height:200px;display:flex;flex-direction:column;justify-content:space-between}
+  .mcard::after{content:"";position:absolute;top:-60%;left:-20%;width:80%;height:220%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:rotate(18deg)}
+  .mcard.metal-black::after{background:linear-gradient(90deg,transparent,rgba(233,196,99,.14),transparent)}
+  .mcard .top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2}
+  .mcard .prog{font-weight:900;letter-spacing:.14em;font-size:12px;opacity:.85}
+  .mcard .cls{font-size:clamp(26px,4vw,38px);font-weight:900;line-height:1}
+  .mcard .cls small{display:block;font-size:13px;font-weight:800;opacity:.75;margin-top:3px}
+  .mcard .chip{width:44px;height:32px;border-radius:7px;background:linear-gradient(135deg,rgba(255,255,255,.7),rgba(255,255,255,.25));border:1px solid rgba(255,255,255,.5);position:relative}
+  .mcard.metal-black .chip{background:linear-gradient(135deg,rgba(233,196,99,.5),rgba(233,196,99,.15));border-color:rgba(233,196,99,.4)}
+  .mcard .chip::before{content:"";position:absolute;inset:8px 6px;border:1px solid rgba(0,0,0,.12);border-radius:3px}
+  .mcard .bot{display:flex;justify-content:space-between;align-items:flex-end;position:relative;z-index:2}
+  .mcard .mname{font-size:22px;font-weight:900;line-height:1.1}
+  .mcard .since{font-size:11.5px;font-weight:700;opacity:.8;margin-top:3px}
+  .mcard .bal b{font-size:26px;font-weight:900;display:block;line-height:1}.mcard .bal span{font-size:11px;font-weight:700;opacity:.8}
+  .mcard .medal{position:absolute;left:20px;top:50%;transform:translateY(-50%);opacity:.15;z-index:1}.mcard .medal svg{width:120px;height:120px}
+
+  .trail{display:flex;align-items:flex-end;position:relative;padding:10px 4px 0}
+  .trail .st{flex:1;text-align:center;position:relative}
+  .trail .st .dot{width:26px;height:26px;border-radius:50%;margin:0 auto;display:grid;place-items:center;font-weight:900;font-size:12px;color:#fff;border:3px solid #fff;box-shadow:var(--shadow2);position:relative;z-index:2}
+  .trail .st .lbl{font-size:11px;font-weight:800;margin-top:6px;color:var(--muted)}
+  .trail .st.done .lbl,.trail .st.cur .lbl{color:var(--ink)}.trail .st.cur .dot{transform:scale(1.35)}
+  .trail .line{position:absolute;top:13px;right:50%;left:-50%;height:4px;z-index:1;background:var(--line)}
+  .trail .st.done .line,.trail .st.cur .line{background:linear-gradient(90deg,var(--teal),var(--orange))}
+  .trail .st:first-child .line{display:none}
+
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:820px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr}.g2{grid-template-columns:1fr}}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow2)}
+  .stat .lab{font-size:12px;color:var(--muted);font-weight:800;display:flex;align-items:center;gap:6px}
+  .stat .big{font-size:30px;font-weight:900;margin-top:4px;line-height:1}.stat .sub{font-size:12px;color:var(--muted);margin-top:5px}
+  .auto,.self{font-size:10px;font-weight:900;padding:2px 7px;border-radius:999px}
+  .auto{background:rgba(91,131,240,.12);color:var(--blue)}.self{background:rgba(217,165,49,.14);color:var(--gold)}
+  .bar{height:10px;background:#eef1f7;border-radius:999px;overflow:hidden;margin-top:8px;border:1px solid var(--line)}
+  .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--orange));border-radius:999px}
+  .tierbadge{display:inline-flex;align-items:center;gap:6px;font-weight:900;padding:5px 12px;border-radius:999px;font-size:12.5px}
+  .forfeit{margin-top:14px;background:#fff4f6;border:1px solid #f6c9d3;border-radius:12px;padding:12px 15px;font-size:13px;color:#8a3a4c}.forfeit b{color:var(--red)}
+  .note{background:#eef8fb;border:1px solid #bfe4ec;border-radius:12px;padding:13px 16px;font-size:13.5px;color:#1d4a56;margin-top:14px}
+
+  table{width:100%;border-collapse:collapse}
+  .lead th,.lead td{padding:12px;text-align:right;border-bottom:1px solid var(--line);vertical-align:middle}
+  .lead thead th{color:var(--ink2);font-size:12.5px;font-weight:900;background:#f3f6fb}
+  .lead tbody tr:hover{background:#f7f9fc}
+  .lead .rk{font-weight:900;color:var(--muted);width:38px;font-size:16px}.lead .rk.top{color:var(--gold)}
+  .lead .me{background:#eef8fb!important}
+  .lead .who{display:flex;align-items:center;gap:9px;font-weight:800}
+  .lead .av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:900;color:#fff;font-size:12px}
+  .trend{font-weight:800}.trend.up{color:var(--good)}.trend.flat{color:var(--muted)}.stars{color:var(--gold);letter-spacing:1px}
+  .tabs{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap}
+  .tabs button{background:#fff;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-weight:800;font-size:13px;padding:8px 15px;border-radius:999px;cursor:pointer;box-shadow:var(--shadow2)}
+  .tabs button.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+
+  /* dept vs dept */
+  .vs{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-top:8px}
+  .vs .team{border-radius:16px;padding:16px 18px;box-shadow:var(--shadow2)}
+  .vs .team.a{background:linear-gradient(135deg,#eef7fb,#e0eff6);border:1px solid #bfe0ec}
+  .vs .team.b{background:linear-gradient(135deg,#fff2ea,#ffe7d8);border:1px solid #f6cba6}
+  .vs .team .tt{font-weight:900;font-size:15px}.vs .team .sc{font-size:30px;font-weight:900;margin-top:2px}
+  .vs .team .mm{font-size:12px;color:var(--muted)}
+  .vs .mid{text-align:center;font-weight:900;color:var(--muted);font-size:20px}
+  .vsbar{height:14px;border-radius:999px;overflow:hidden;display:flex;margin-top:14px;border:1px solid var(--line)}
+  .vsbar .a{background:linear-gradient(90deg,#2299b3,#5ac6dc)}.vsbar .b{background:linear-gradient(90deg,#f6894f,#fc9f67)}
+  .deptprize{margin-top:12px;background:linear-gradient(135deg,#fff6ed,#ffeede);border:1px solid #f6cba6;border-radius:12px;padding:12px 14px;font-size:13px;color:#7a4318;line-height:1.5}.deptprize b{color:#8a4a1e}
+
+  /* approval queue */
+  .appr{display:grid;gap:10px;margin-top:12px}
+  .appr .row{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow2)}
+  .appr .row .av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:900;color:#fff;font-size:13px;flex:none}
+  .appr .row .info{flex:1}.appr .row .info b{font-weight:900}.appr .row .info .d{font-size:12.5px;color:var(--muted)}
+  .appr .row .pts{font-weight:900;color:var(--good)}
+  .appr .row .acts{display:flex;gap:8px}
+  .appr .row button{border:none;width:38px;height:38px;border-radius:11px;font-size:17px;font-weight:900;cursor:pointer}
+  .appr .row .ok{background:rgba(37,184,119,.15);color:var(--good)}.appr .row .no{background:rgba(232,96,122,.15);color:var(--red)}
+
+  .prizes{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:15px}
+  .prize{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;position:relative;overflow:hidden;box-shadow:var(--shadow2)}
+  .prize.locked{opacity:.62}
+  .prize .ic{height:130px;border-radius:14px;overflow:hidden;position:relative;background:linear-gradient(135deg,#f0f5fb,#e7eef8);display:grid;place-items:center;margin-bottom:11px}
+  .prize.halo .ic{background:linear-gradient(135deg,#fff2e2,#ffe9d0)}
+  .prize .ic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .prize .ic .fb svg{height:70px;width:auto}
+  .prize .nm{font-weight:800;min-height:40px;font-size:15.5px}
+  .prize .pts{font-size:22px;font-weight:900;color:var(--orange);margin-top:2px}
+  .prize .eta{font-size:12px;color:var(--muted);margin-top:6px}
+  .prize .band{position:absolute;top:12px;left:-30px;transform:rotate(-45deg);background:var(--teal);color:#fff;font-weight:900;font-size:10px;padding:3px 34px;box-shadow:var(--shadow2);z-index:3}
+  .prize .band.halo{background:linear-gradient(90deg,var(--orange),var(--gold))}
+  .prize .lockchip{position:absolute;top:10px;right:10px;z-index:3;background:rgba(20,27,46,.82);color:#fff;font-size:10.5px;font-weight:900;padding:4px 9px;border-radius:999px}
+  .prize .redeem{margin-top:11px;width:100%;border:none;border-radius:11px;padding:10px;font-family:inherit;font-weight:900;cursor:pointer;font-size:13px}
+  .prize .redeem.can{background:var(--good);color:#fff}.prize .redeem.cant{background:#eef1f7;color:var(--muted);cursor:not-allowed}
+
+  .field{margin-top:12px}.field label{display:block;font-weight:800;font-size:13px;margin-bottom:6px}
+  select,input{width:100%;background:#f8fafd;border:1px solid var(--line);border-radius:12px;color:var(--ink);font-family:inherit;font-size:15px;padding:12px 13px}
+  select:focus,input:focus{outline:none;border-color:var(--teal)}
+  .btn{background:linear-gradient(90deg,var(--orange),var(--orange2));border:none;color:#fff;font-family:inherit;font-weight:900;font-size:15px;padding:13px 20px;border-radius:13px;cursor:pointer;width:100%;margin-top:16px;box-shadow:0 6px 18px rgba(246,137,79,.3)}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px}.ptsPreview{font-weight:900;color:var(--good)}
+  .feed{display:grid;gap:9px;margin-top:6px}
+  .feed .row{display:flex;align-items:center;gap:10px;background:#f8fafd;border:1px solid var(--line);border-radius:12px;padding:10px 13px;font-size:13.5px}
+  .feed .row .dot{width:9px;height:9px;border-radius:50%;flex:none}.feed .row .pts{margin-inline-start:auto;font-weight:900;color:var(--good)}
+  .feed .row .badge{font-size:10px;font-weight:800;padding:1px 7px;border-radius:999px;background:rgba(217,165,49,.14);color:var(--gold)}
+  .reftree{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+  .refnode{background:#f0f9f4;border:1px solid #bfe6ce;border-radius:12px;padding:9px 13px;font-size:13px;color:#1e6b45}.refnode b{color:var(--good)}
+  .pill{font-size:11px;font-weight:800;padding:2px 9px;border-radius:999px;background:#f0f3f9;color:var(--muted);border:1px solid var(--line)}
+
+  .tiershow{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:16px}
+  @media(max-width:900px){.tiershow{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.tiershow{grid-template-columns:1fr}}
+  .tcard{border-radius:18px;padding:18px;box-shadow:var(--shadow);position:relative;overflow:hidden;min-height:280px;display:flex;flex-direction:column}
+  .tcard .med{margin:0 auto 8px}.tcard .med svg{width:56px;height:56px}
+  .tcard .tn{font-weight:900;font-size:20px;text-align:center}
+  .tcard .te{font-weight:800;font-size:11px;letter-spacing:.14em;text-align:center;opacity:.7;margin-bottom:6px}
+  .tcard .thr{text-align:center;font-weight:800;font-size:12.5px;opacity:.9;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid rgba(0,0,0,.14)}
+  .tcard.metal-black .thr{border-color:rgba(233,196,99,.3)}
+  .tcard ul{list-style:none;margin:0;padding:0;font-size:12.5px;font-weight:600;line-height:1.65}
+  .tcard li{display:flex;gap:6px;margin-bottom:3px}.tcard li::before{content:"✦";opacity:.7}
+  .tcard .mult{margin-top:auto;padding-top:10px;font-weight:900;font-size:15px;text-align:center}
+  .tcard .newhere{font-size:12px;font-weight:700;background:rgba(255,255,255,.42);border-radius:10px;padding:8px 10px;margin:2px 0 8px;line-height:1.45}
+  .tcard.metal-black .newhere{background:rgba(233,196,99,.16)}
+  details.htype{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden;background:#fff}
+  details.htype>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;padding:11px 14px;font-size:14px}
+  details.htype>summary::-webkit-details-marker{display:none}
+  details.htype>summary::after{content:"▾";margin-inline-start:6px;color:var(--muted)}
+  details.htype[open]>summary::after{content:"▴"}
+  details.htype>summary .sdot{width:10px;height:10px;border-radius:50%;flex:none}
+  details.htype>summary .cnt{margin-inline-start:auto;font-weight:800;color:var(--muted);font-size:12.5px}
+  .hlist{border-top:1px solid var(--line)}
+  .hitem{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px}
+  .hitem:last-child{border-bottom:none}
+  .hitem .hc{font-weight:700}.hitem .hd{font-size:11.5px;color:var(--muted)}
+  .hitem .hr{display:flex;align-items:center;gap:8px;flex:none}.hitem .hp{font-weight:900;color:var(--good)}
+  .hb{font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:999px}
+  .hb.ok{background:rgba(37,184,119,.15);color:var(--good)}.hb.no{background:rgba(232,96,122,.15);color:var(--red)}.hb.pend{background:rgba(217,165,49,.16);color:var(--gold)}
+  .feed .row .badge.ok{background:rgba(37,184,119,.15);color:var(--good)}.feed .row .badge.no{background:rgba(232,96,122,.15);color:var(--red)}
+  .throw{display:flex;gap:12px;align-items:center;padding:11px 13px;border-radius:12px;margin-bottom:8px;border:1px solid rgba(0,0,0,.07);box-shadow:var(--shadow2)}
+  .throw .ti{font-size:24px;flex:none}.throw .tinfo{flex:1}.throw .tw{font-size:12.5px;margin-top:2px;opacity:.92}
+  .throw.cur{outline:3px solid var(--orange);outline-offset:2px;box-shadow:0 6px 22px rgba(246,137,79,.3)}
+  .hereb{font-size:10.5px;font-weight:900;padding:2px 9px;border-radius:999px;background:var(--orange);color:#fff;margin-inline-start:6px}
+  .qtable{width:100%;border-collapse:collapse;margin-top:10px;font-size:12.5px}
+  .qtable th,.qtable td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:center}
+  .qtable th{color:var(--muted);font-weight:800}.qtable td.win{font-weight:900;color:var(--good)}.qtable td:first-child{text-align:right;font-weight:800}
+  .redreq{background:#f4f0ff;border:1px solid #d9ccf7;color:#5a3fa0}
+
+  .modal-overlay{position:fixed;inset:0;z-index:80;background:rgba(20,27,46,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:.25s}
+  .modal-overlay.show{opacity:1;pointer-events:auto}
+  .modal{background:#fff;border-radius:22px;max-width:470px;width:100%;padding:26px 24px;box-shadow:0 30px 80px rgba(0,0,0,.35);transform:translateY(16px) scale(.98);transition:.25s;text-align:center}
+  .modal-overlay.show .modal{transform:none}
+  .modal .mm{font-size:36px;line-height:1}
+  .modal h3{font-size:21px;font-weight:900;margin:8px 0 4px}
+  .modal .sub{color:var(--ink2);font-size:14px;margin-bottom:16px}
+  .modal .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:430px){.modal .two{grid-template-columns:1fr}}
+  .modal .opt{border-radius:16px;padding:13px;border:1px solid var(--line)}
+  .modal .opt.now{background:#fff7f1;border-color:#f6c9a3}.modal .opt.wait{background:#eff9f3;border-color:#bfe6ce}
+  .modal .opt .im{height:74px;display:grid;place-items:center;border-radius:12px;overflow:hidden;background:#f1f5fb;margin-bottom:8px;position:relative}
+  .modal .opt .im img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.modal .opt .im .fb svg{height:44px}
+  .modal .opt .t{font-weight:800;font-size:14px}.modal .opt .p{font-weight:900;color:var(--orange);font-size:13px;margin-top:2px}
+  .modal .opt button{margin-top:10px;width:100%;border:none;border-radius:11px;padding:10px;font-family:inherit;font-weight:900;font-size:13px;cursor:pointer;color:#fff}
+  .modal .opt.now button{background:linear-gradient(90deg,#f6894f,#fc9f67)}.modal .opt.wait button{background:linear-gradient(90deg,#1fa768,#25b877)}
+  .modal .opt .why{font-size:11px;color:var(--muted);margin-top:7px;font-weight:600}
+  .modal .skip{margin-top:14px;background:none;border:none;color:var(--muted);font-family:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline}
+
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);z-index:70;background:#fff;border:1px solid var(--teal-l);border-radius:14px;padding:14px 22px;font-weight:900;box-shadow:var(--shadow);transition:.4s}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .navtabs{display:flex;gap:6px;align-items:center}
+  .tblwrap{width:100%}
+  /* ===== MOBILE ===== */
+  @media(max-width:760px){
+    .nav{padding:8px 12px;gap:5px;align-items:center}
+    .brand{font-size:14px}.brand .logo{width:26px;height:26px}.brand small{display:none}
+    .navtabs{order:20;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-top:8px;margin-top:4px;border-top:1px solid var(--line);gap:5px}
+    .navtabs::-webkit-scrollbar{display:none}
+    .nav button.tab{white-space:nowrap;flex:none;font-size:13px;padding:8px 12px}
+    .navtier{padding:5px 10px;font-size:12px}.navtier .em{font-size:14px}
+    .navwallet{padding:5px 11px;font-size:12.5px}.navwallet small{display:none}
+    .whoami{padding:4px 5px 4px 10px}.whoami .nm{font-size:12px}.whoami .muted{display:none}
+    .ticker .track{animation-duration:22s}
+    .wrap{padding:16px 12px 90px}
+    h1{font-size:22px}.sec{margin-top:22px}
+    .card{padding:15px}
+    .mcard{padding:18px;min-height:172px}.mcard .cls{font-size:30px}.mcard .medal svg{width:94px;height:94px}.mcard .mname{font-size:19px}
+    .vs{grid-template-columns:1fr;gap:9px}.vs .mid{padding:0;font-size:16px}
+    .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px}
+    .lead th,.lead td{padding:9px 7px;font-size:12.5px;white-space:nowrap}.lead .rk{width:26px;font-size:14px}.lead .av{width:28px;height:28px;font-size:11px}
+    .qtable th,.qtable td{padding:7px 6px;font-size:11.5px;white-space:nowrap}
+    .stat .big{font-size:24px}
+    .throw{padding:10px 11px}.throw .ti{font-size:21px}
+    .btn{padding:14px 18px}
+    .modal{padding:20px 17px}
+    .heroArt .cap h1{font-size:26px}
+    .tiershow{grid-template-columns:1fr 1fr}
+    .prizes{gap:14px}.prize{padding:16px}.prize .ic{height:160px}
+    .align .col,.gov .row,.decision,.summit{padding:16px}
+    .field label{font-size:14px}select,input{font-size:16px;padding:13px 14px}
+    .lead .who{gap:7px}.pill{font-size:11px}
+    .reftree{gap:8px}.refnode{font-size:12.5px}
+  }
+  @media(max-width:560px){
+    .g4{grid-template-columns:1fr 1fr}
+    .tiershow{grid-template-columns:1fr}
+    .prizes{grid-template-columns:1fr;gap:16px}
+    .prize{padding:16px 16px 18px}
+    .prize .ic{height:200px}
+    .prize .nm{font-size:16.5px;min-height:0;margin:11px 0 6px}
+    .prize .pts{font-size:26px}
+    .prize .eta{font-size:12.5px;margin-top:7px}
+    .prize .redeem{padding:13px;font-size:14px;margin-top:13px}
+    .prize .band{font-size:11px;padding:4px 36px}
+    .cat{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="ticker"><div class="live"><span class="pdot"></span>LIVE</div><div class="track" id="ticker"></div></div>
+
+<div class="nav" id="nav" style="display:none">
+  <div class="brand"><svg class="logo" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" fill="#141b2e"/><path d="M8 28 L17 15 L23 22 L32 10" stroke="#fc9f67" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="10" r="3" fill="#5ac6dc"/></svg>מועדון הפסגה <small>המסע לפסגה</small></div>
+  <div class="spacer"></div>
+  <div class="navtabs">
+  <button class="tab active" data-view="dash">המסע שלי</button>
+  <button class="tab" data-view="log">תעד הישג</button>
+  <button class="tab" data-view="board">קיר האלופים</button>
+  <button class="tab" data-view="prizes">הפרסים</button>
+  <button class="tab" data-view="rules">איך זה עובד</button>
+  </div>
+  <div class="navtier" id="navTier" style="display:none"></div>
+  <div class="navwallet" id="navWallet" style="display:none"><span>💰</span><span class="c" id="navWalletC">0</span><small>נק'</small></div>
+  <div class="whoami" id="whoami" onclick="logout()"><span class="av" id="waAv"></span><span class="nm" id="waNm"></span><span class="muted" style="font-size:11px">החלף</span></div>
+</div>
+
+<canvas id="confetti"></canvas><div class="toast" id="toast"></div>
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()"><div class="modal" id="modalBody"></div></div>
+
+<div class="wrap">
+  <div id="login" class="login">
+    <div class="heroArt">
+      <svg viewBox="0 0 900 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eaf6fb"/><stop offset="1" stop-color="#fdf1e9"/></linearGradient>
+        <linearGradient id="m1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fd0dd"/><stop offset="1" stop-color="#6fb6c9"/></linearGradient>
+        <linearGradient id="m2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#345b74"/><stop offset="1" stop-color="#22405a"/></linearGradient></defs>
+        <rect width="900" height="300" fill="url(#sky)"/><circle cx="720" cy="70" r="42" fill="#ffd9a8" opacity=".8"/>
+        <path d="M0 300 L150 150 L250 220 L360 120 L470 210 L560 130 L700 240 L820 160 L900 220 L900 300 Z" fill="url(#m1)" opacity=".55"/>
+        <path d="M0 300 L120 200 L240 250 L380 150 L470 235 L600 175 L740 270 L860 200 L900 250 L900 300 Z" fill="url(#m2)"/>
+        <path d="M470 210 L560 130 L650 210 Z" fill="#fff" opacity=".9"/><path d="M560 130 L560 92" stroke="#f6894f" stroke-width="4"/><path d="M560 92 L588 100 L560 110 Z" fill="#f6894f"/></svg>
+      <div class="cap"><h1>המסע לפסגה</h1><p>כל דרגה נקנית בערך אמיתי שיצרת ללקוח</p></div>
+    </div>
+    <div class="subnote">מי אתה? בחר את עצמך כדי להיכנס למסע שלך.<br>כל הישג שמתעדים עובר לאישור אופק (✓/✗) ואז נספר לדרגה, לארנק ולתחרות.</div>
+    <div class="users" id="userGrid"></div>
+    <div style="text-align:center;margin-top:18px"><button onclick="addUser()" style="background:#fff;border:1.5px dashed var(--line,#d5deea);color:var(--ink,#22405a);border-radius:12px;padding:11px 20px;font-size:14px;font-weight:800;cursor:pointer">＋ הוסף מנהל כספים</button></div>
+  </div>
+  <div id="app" style="display:none"><div id="v-dash"></div><div id="v-log" class="hidden"></div><div id="v-board" class="hidden"></div><div id="v-prizes" class="hidden"></div><div id="v-rules" class="hidden"></div></div>
+</div>
+
+<script>
+const AV=["#f6894f","#2299b3","#25b877","#d9a531","#5b83f0","#9a6ff0","#fc8a68","#e8607a","#141b2e"];
+const TIERS=[
+  {k:"member",n:"חבר",en:"MEMBER",min:0,metal:"metal-member",mult:1.0,ico:"🎫",unlock:"פרסים קטנים - שוברים, ספא, גאדג'טים",newHere:"נכנסים למשחק - הנקודות מתחילות להצטבר ופרסים קטנים נפתחים"},
+  {k:"silver",n:"כסף",en:"SILVER",min:5000,metal:"metal-silver",mult:1.1,ico:"🥈",unlock:"AirPods, סופ\"ש מלון, Apple Watch",newHere:"מכפיל ×1.1 + נפתחים AirPods, סופ\"ש מלון ו-Apple Watch"},
+  {k:"gold",n:"זהב",en:"GOLD",min:15000,metal:"metal-gold",mult:1.2,ico:"🥇",unlock:"iPad, iPhone",newHere:"מכפיל ×1.2 + נפתחים iPad ו-iPhone + מוזכר בתוכן של אופק"},
+  {k:"platinum",n:"פלטינה",en:"PLATINUM",min:30000,metal:"metal-platinum",mult:1.3,ico:"💎",unlock:"MacBook, טיסה, רכב",newHere:"מכפיל ×1.3 + כל הקטלוג נפתח (MacBook/טיסה/רכב) + President's Club"},
+  {k:"topplat",n:"טופ פלטינה",en:"TOP PLATINUM",min:55000,metal:"metal-topplat",mult:1.4,ico:"🏆",unlock:"המכפיל הגבוה ביותר + ארוחת בוקר אחת לרבעון עם אופק ואלירן + המעמד הבכיר ביותר שאפשר להגיע אליו",newHere:"הפסגה שאפשר להגיע אליה: מכפיל ×1.4 (הגבוה ביותר), קטלוג מלא, ארוחת בוקר רבעונית קבועה עם אופק ואלירן, וגישה ישירה לאופק"},
+  {k:"black",n:"המעגל הפנימי",en:"INNER CIRCLE",min:99999999,metal:"metal-black",mult:null,ico:"👑",unlock:"עומר ויוראי בלבד - מנהלי המחלקות והשותפים",newHere:"עומר ויוראי בלבד - מנהלי המחלקות והשותפים העסקיים. לא מגיעים לכאן דרך נקודות; זה מעמד ההנהלה."}
+];
+// SCALE: manager holds ~20-25 clients. per-achievement is modest so ONE win/client != a flight.
+// ~1,000-1,600 pts/month for a strong manager. flight ~2 years, car ~4-5 years.
+const SEED=[
+  {id:"benhazan",name:"בן חזן",dept:"B",role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0},
+  {id:"shoham",name:"שוהם",dept:"A",role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0},
+  {id:"arik",name:"אריק",dept:"B",role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0},
+  {id:"oshri",name:"אושרי",dept:"A",role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0},
+  {id:"ido",name:"עידו",dept:"A",role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0},
+  {id:"tali",name:"טלי קבדה",dept:"B",role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0},
+  {id:"idon",name:"עידו נחום",dept:"B",role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0},
+  {id:"yorai",name:"יוראי מליח",dept:"A",role:"מנהל מחלקה A",career:0,balance:0,stars:0,streak:0,refs:0,coach:true,tierKey:"black"},
+  {id:"omer",name:"עומר בהר",dept:"B",role:"מנהל מחלקה B",career:0,balance:0,stars:0,streak:0,refs:0,coach:true,tierKey:"black"},
+  {id:"ofek",name:"אופק",dept:"-",role:"בעלים / אדמין",career:0,balance:0,stars:0,streak:0,refs:0,admin:true},
+  {id:"eliran",name:"אלירן אוחיון",dept:"-",role:"מייסד / אדמין",career:0,balance:0,stars:0,streak:0,refs:0,admin:true}
+];
+const JOINED="1.7.2026";
+const IMG="https://images.unsplash.com/photo-";const Q="?auto=format&fit=crop&w=600&q=70";
+// prizes rescaled: small grabbable early (hook) but "not worth it" vs the big ones; big = real long effort
+const PRIZES=[
+  {n:"שובר BuyMe / ארוחה זוגית",p:1500,minTier:0,band:"קטן · אפשר מהר - אבל שווה לחכות",cls:"",ic:"gift",img:IMG+"1513885535751-8b9238bd345a"+Q},
+  {n:"ארוחת בוקר עם אופק / אלירן",p:4500,minTier:0,band:"מיוחד · הזמן היקר שלנו · 4-6 עיניים על העסק שלך",cls:"halo",ic:"coffee",img:IMG+"1521017432531-fbd92d768814"+Q},
+  {n:"אוזניות / רמקול נייד",p:3000,minTier:0,band:"קטן · ~1-2 ח'",cls:"",ic:"airpods",img:IMG+"1608043152269-423dbba4e7e1"+Q},
+  {n:"יום ספא זוגי מפנק",p:5000,minTier:0,band:"קטן · ~3-4 ח'",cls:"",ic:"spa",img:IMG+"1540555700478-4be289fbecef"+Q},
+  {n:"AirPods",p:8000,minTier:1,band:"כסף · ~5-6 ח'",cls:"",ic:"airpods",img:IMG+"1600294037681-c80b4cb5b434"+Q},
+  {n:'סופ"ש מלון בארץ (זוגי)',p:14000,minTier:1,band:"כסף · ~9-10 ח'",cls:"",ic:"hotel",img:IMG+"1566073771259-6a8506099945"+Q},
+  {n:"Apple Watch",p:16000,minTier:1,band:"כסף · ~1 שנה",cls:"",ic:"watch",img:IMG+"1434493789847-2f02dc6ca35d"+Q},
+  {n:"iPad",p:20000,minTier:2,band:"זהב · ~1-1.5 שנה",cls:"",ic:"ipad",img:IMG+"1544244015-0df4b3ffc6b0"+Q},
+  {n:"iPhone (בסיס)",p:28000,minTier:2,band:"זהב · ~1.5 שנה",cls:"",ic:"iphone",img:IMG+"1511707171634-5f897ff02aa9"+Q},
+  {n:"iPhone Pro",p:38000,minTier:2,band:"זהב · ~2 שנה",cls:"",ic:"iphone",img:IMG+"1592286927505-1def25115558"+Q},
+  {n:"MacBook Air",p:45000,minTier:3,band:"פלטינה · ~2 שנה",cls:"halo",ic:"mac",img:IMG+"1517336714731-489689fd1ca8"+Q},
+  {n:"טיסה זוגית לאירופה",p:55000,minTier:3,band:"פלטינה · ~2-2.5 שנה",cls:"halo",ic:"plane",img:IMG+"1436491865332-7a61a109cc05"+Q},
+  {n:'חופשה זוגית מפנקת בחו"ל',p:90000,minTier:3,band:"הילה · ~3-4 שנה",cls:"halo",ic:"beach",img:IMG+"1507525428034-b723cf961d3e"+Q},
+  {n:"השתתפות מימון רכב / טיול גדול",p:160000,minTier:3,band:"הילה · ~4-5 שנה",cls:"halo",ic:"car",img:IMG+"1503376780353-7e6692767b70"+Q}
+];
+const TRIGGERS=[
+  {k:"A",label:"A · תוצאה מדידה ללקוח",pts:500,color:"#d9a531",vvs:true,note:"הכי מתוגמל - זה הלב. תוצאה ללקוח מנצחת הכל. מוכפל בדרגה.",ex:["העלאת רווח/הכנסות רבעוני ב-25%+ (כמו Pitbender: 700K→1.6M)","הפחתת עלות מימון ב-50-60% בזכות איחוד הלוואות","שיפור תזרים מדיד ומאומת בפלאסטו"]},
+  {k:"G_newclient",label:"G · לקוח חדש שהבאת בעצמך (מחוץ להורייזן)",pts:700,color:"#25b877",vvs:true,note:"ערך שיא - הבאת עסק חדש מהיוזמה/הרשת שלך, לא מליד שיווקי. הכנסה חדשה לחברה. מוכפל בדרגה.",ex:["בעל עסק שהבאת מהרשת שלך ונסגר לריטיינר","לקוח חדש שיזמת בעצמך - לא הגיע מהשיווק של הורייזן"]},
+  {k:"G_partner",label:"G · שותפות עסקית מעניינת שהבשלת להורייזן",pts:600,color:"#25b877",vvs:true,note:"פיתוח עסקי - חיבור/שותפות אסטרטגית שהבשלת (ספק, מפיץ, מקור deal-flow). מוכפל בדרגה.",ex:["חיבור לגורם שהפך לשותף / מקור לידים להורייזן","שיתוף פעולה שהבשיל למערכת יחסים עסקית"]},
+  {k:"A_p90",label:"A · לקוח עבר ציון 90 בפלאסטו",pts:500,color:"#d9a531",vvs:true,note:"בריאות פיננסית מעולה - רק ציון 90+ מקנה נקודות.",ex:["ציון הבריאות הפיננסי של הלקוח חצה 90","קפיצה מ-74 ל-91 תוך רבעון"]},
+  {k:"B_case",label:"B · קייס סטאדי / כוכב Horizon",pts:350,color:"#2299b3",vvs:true,note:"נכס מותג - מזכה בכוכב. נשען על תוצאה מאומתת. מוכפל בדרגה.",ex:["קייס וואו של איחוד הלוואות ליבואן","טרנספורמציה של קמעונאי עם מספרים מאומתים בפלאסטו"]},
+  {k:"B_ref",label:"B · הפניה שהומרה (פה-לאוזן)",pts:300,color:"#2299b3",vvs:true,note:"הלקוח החדש נכנס לתיק שלך = התיק גדל + נקודות.",ex:["לקוח מרוצה הפנה בעל עסק שנסגר לריטיינר מלא","הפניה מלקוח קיים שהומרה ללקוח משלם"]},
+  {k:"B_rev",label:"B · ביקורת גוגל 5★ / המלצה מצולמת",pts:150,color:"#2299b3",vvs:true,note:"מלקוח בריא, הבקשה יוצאת ממערכת Horizon.",ex:["ביקורת 5 כוכבים בגוגל ביוזמת הלקוח","סרטון המלצה מלקוח מרוצה"]},
+  {k:"S_training",label:"S · הדרכה/העשרה לצוות לשיפור מנהלי הכספים",pts:300,color:"#9a6ff0",vvs:false,note:"תרומה לצוות - יזמת והעברת הדרכה שמעלה את רמת מנהלי הכספים. כסף בארנק + הכרה.",ex:["העברת סדנה/הדרכה מקצועית לצוות","בניית מדריך/תהליך שמשפר את כל המחלקה"]},
+  {k:"C_cross",label:"C · הפניה לחטיבה (אשראי/מועדון/טק/אקדמיה נוער עשיר)",pts:200,color:"#5b83f0",vvs:false,note:"קרוס-סייל - כסף בארנק (לא מזיז בליגה).",ex:["הלקוח יצא לגיוס אשראי דרך הורייזן","הלקוח הצטרף למועדון לקוחות / אקדמיה / טכנולוגיה"]},
+  {k:"D_nps",label:"D · NPS 9-10 / השלמת מודל אופק 360",pts:100,color:"#9a6ff0",vvs:false,note:"כסף בארנק + תנאי לוותק ולסטריק.",ex:["הלקוח נתן NPS 9-10 בסקר הרבעוני","השלמת 10 שלבי מודל אופק 360 עם הלקוח"]}
+];
+const MONTHS=["ינו","פבר","מרץ","אפר","מאי","יונ","יול","אוג","ספט","אוק","נוב","דצמ"];
+
+const state={me:null,logs:{},redemp:{},seq:0};
+const ADMIN_PIN="12445678";let pendingAdmin=null;
+const $=s=>document.querySelector(s);
+function load(){try{return JSON.parse(localStorage.getItem("ascend5")||"{}")}catch(e){return{}}}
+function save(){const cur=load();if(cur.seq&&cur.seq>state.seq)state.seq=cur.seq;localStorage.setItem("ascend5",JSON.stringify({users:USERS,logs:state.logs,redemp:state.redemp,seq:state.seq,me:state.me&&state.me.id}))}
+function uid4(){try{return crypto.randomUUID()}catch(e){return"r"+Date.now().toString(36)+Math.round(performance.now()).toString(36)}}
+function syncFromStorage(u){const cur=load();if(!cur||!cur.users)return;const fu=cur.users.find(x=>x.id===u.id);if(fu&&typeof fu.balance==="number")u.balance=fu.balance;if(cur.redemp)state.redemp=cur.redemp;if(cur.logs)state.logs=cur.logs;if(cur.seq&&cur.seq>state.seq)state.seq=cur.seq;}
+function initials(n){return n.trim().split(" ")[0].slice(0,2)}
+function tierOf(c){let t=TIERS[0];for(const x of TIERS){if(x.min<99999999&&c>=x.min)t=x}return t}
+function userTier(u){return u&&u.tierKey?(TIERS.find(t=>t.k===u.tierKey)||tierOf(u.career)):tierOf(u.career);}
+function tierIdx(c){return TIERS.indexOf(tierOf(c))}
+function nextTier(c){for(const x of TIERS){if(x.min>c)return x}return null}
+function nf(n){return Math.round(n).toLocaleString("he-IL")}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function joinMs(){const p=(JOINED||"").split(".");return p.length===3?new Date(+p[2],(+p[1])-1,+p[0]).getTime():Date.parse("2026-07-01");}
+function monthsOf(u){const ms=(u&&u.joined)||joinMs();const el=(Date.now()-ms)/2629800000;return Math.max(1,el);}
+function rate(u){return u.career>0?u.career/monthsOf(u):0}
+function since(m){const d=new Date();d.setMonth(d.getMonth()-m);return MONTHS[d.getMonth()]+" "+d.getFullYear()}
+function deptScore(dep){return USERS.filter(u=>!u.admin&&!u.coach&&u.dept===dep).reduce((a,b)=>a+b.career,0)}
+
+let USERS=[];
+(function init(){const saved=load();USERS=SEED.map((s,i)=>({...s,color:AV[i%AV.length]}));
+  if(saved.users)saved.users.forEach(su=>{const u=USERS.find(x=>x.id===su.id);if(u)Object.assign(u,{career:su.career,balance:su.balance,stars:su.stars,streak:su.streak,refs:su.refs});else if(su&&su.id&&su.name&&!su.admin&&!su.coach)USERS.push({role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0,...su,color:su.color||AV[USERS.length%AV.length]});});
+  state.logs=saved.logs||{};state.redemp=saved.redemp||{};let _mx=saved.seq||0;
+  Object.values(state.logs).forEach(a=>(a||[]).forEach(l=>{if(l&&l.id>_mx)_mx=l.id}));Object.values(state.redemp).forEach(a=>(a||[]).forEach(r=>{if(r&&r.id>_mx)_mx=r.id}));state.seq=_mx;
+  {const _ti=["🏔 מועדון הפסגה נפתח - <b>כולם מתחילים מאותה נקודה</b>","תוצאה מדידה ללקוח = <b>הניקוד הגבוה ביותר</b>","הבאת לקוח חדש מבחוץ? <b>+700 נק'</b>","כל הישג שמתועד ומאושר → נקודות לארנק","עלייה בדרגה = פרסים גדולים יותר נפתחים","מחלקה A מול מחלקה B - הרבעון נפתח <b>0:0</b>","פרס מחלקה מובילה רבעוני: <b>1,000 ₪</b>","הפסגה: טופ פלטינה + ארוחת בוקר עם אופק ואלירן"];$("#ticker").innerHTML=_ti.concat(_ti).map(t=>`<span>${t}</span>`).join("");}
+  const qp=new URLSearchParams(location.search).get("u");if(qp){const qu=USERS.find(x=>x.id===qp);if(qu)return enter(qu);}
+  if(saved.me){const u=USERS.find(x=>x.id===saved.me);if(u)return enter(u)}renderLogin();})();
+
+function addUser(){
+  const name=(prompt("שם מנהל הכספים החדש:")||"").trim().replace(/[<>"'`]/g,"").slice(0,40);
+  if(!name)return;
+  const dept=(prompt("מחלקה של "+name+" - הקלד A (יוראי) או B (עומר):")||"").trim().toUpperCase();
+  if(dept!=="A"&&dept!=="B"){alert("מחלקה חייבת להיות A או B בלבד.");return;}
+  const id="m"+Date.now().toString(36)+Math.round((typeof performance!=="undefined"?performance.now():0)).toString(36);
+  USERS.push({id,name,dept,role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0,color:AV[USERS.length%AV.length]});
+  save();renderLogin();
+  alert(name+" נוסף/ה למחלקה "+dept+" · מתחיל/ה מ-0 נקודות. הקישור האישי: ?u="+id);
+}
+function renderLogin(){$("#nav").style.display="none";$("#app").style.display="none";$("#login").style.display="block";
+  $("#userGrid").innerHTML=USERS.filter(u=>!u.admin).map(u=>{const t=userTier(u);
+    return `<div class="ucard" onclick="enter(USERS.find(x=>x.id==='${u.id}'))"><div class="av" style="background:${u.color}">${esc(initials(u.name))}</div>
+    <div class="nm">${esc(u.name)}</div><div class="role">${esc(u.role)}${u.dept!=="-"?" · מח' "+esc(u.dept):""}</div>
+    ${t?`<span class="tiertag ${t.metal}">${t.ico} ${t.n}</span>`:`<span class="tiertag metal-black">👑 אדמין</span>`}</div>`}).join("");}
+function enter(u){if(u.admin){pendingAdmin=u;showPin();return;}doEnter(u);}
+function doEnter(u){state.me=u;$("#login").style.display="none";$("#nav").style.display="flex";$("#app").style.display="block";
+  $("#waAv").style.background=u.color;$("#waAv").textContent=initials(u.name);$("#waNm").textContent=u.name;save();switchView("dash");
+  if(!state.introShown&&!u.admin&&!u.coach){state.introShown=1;setTimeout(()=>{if(state.me&&!$("#modal").classList.contains("show"))maybeTempt();},1600);}}
+function showPin(){$("#modalBody").innerHTML=`<div class="mm">🔒</div><h3>כניסת מנהל</h3>
+  <div class="sub">הזן קוד גישה כדי להיכנס לממשק הניהול ולאשר הישגים.</div>
+  <input id="pinInput" type="password" inputmode="numeric" maxlength="6" placeholder="קוד" autocomplete="off" style="text-align:center;font-size:22px;letter-spacing:8px;max-width:210px;margin:0 auto" onkeydown="if(event.key==='Enter')checkPin()">
+  <div id="pinErr" style="color:var(--red);font-size:13px;font-weight:800;height:18px;margin-top:8px"></div>
+  <button class="btn" style="max-width:210px;margin:4px auto 0" onclick="checkPin()">כניסה</button>
+  <button class="skip" onclick="pendingAdmin=null;closeModal();renderLogin()">ביטול</button>`;
+  $("#modal").classList.add("show");setTimeout(()=>{const i=$("#pinInput");if(i)i.focus();},120);}
+function checkPin(){const v=($("#pinInput").value||"").trim();if(v===ADMIN_PIN){const u=pendingAdmin;pendingAdmin=null;closeModal();doEnter(u);}else{$("#pinErr").textContent="קוד שגוי, נסה שוב";$("#pinInput").value="";$("#pinInput").focus();}}
+function logout(){state.me=null;save();renderLogin();}
+function updateWallet(){const u=state.me,w=$("#navWallet"),tc=$("#navTier");
+  if(u&&!u.admin){w.style.display="flex";$("#navWalletC").textContent=nf(u.balance);const t=userTier(u);tc.style.display="flex";tc.className="navtier "+t.metal;tc.innerHTML=`<span class="em">${t.ico}</span> ${t.n}`;}
+  else{w.style.display="none";tc.style.display="none";}}
+
+document.querySelectorAll(".nav .tab").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
+function switchView(v){document.querySelectorAll(".nav .tab").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
+  ["dash","log","board","prizes","rules"].forEach(x=>$("#v-"+x).classList.toggle("hidden",x!==v));
+  updateWallet();({dash:renderDash,log:renderLog,board:renderBoard,prizes:renderPrizes,rules:renderRules})[v]();}
+
+function medalSVG(t){const c=t.k==="gold"?"#d9a531":t.k==="silver"?"#9aa7bd":t.k==="platinum"?"#7d8aa4":t.k==="black"?"#e9c463":"#2299b3";
+  return `<svg viewBox="0 0 100 100"><circle cx="50" cy="40" r="24" fill="none" stroke="${c}" stroke-width="6"/><path d="M36 58 L29 92 L50 80 L71 92 L64 58" fill="${c}"/><circle cx="50" cy="40" r="12" fill="${c}" opacity=".45"/></svg>`}
+
+function renderDash(){const u=state.me;if(u.admin)return renderAdmin();if(u.coach)return renderCoach();
+  const t=tierOf(u.career),nt=nextTier(u.career),invite=nt&&nt.min>=99999999,showNext=nt&&!invite,prog=showNext?Math.min(100,((u.career-t.min)/(nt.min-t.min))*100):100,r=rate(u);
+  const pend=(state.logs[u.id]||[]).filter(x=>x.status==="pending").reduce((a,b)=>a+b.pts,0);
+  $("#v-dash").innerHTML=`
+  <div class="sec"><div class="kick">שלום ${esc(u.name)}</div><h1>המסע שלי</h1></div>
+  <div class="sec grid g2">
+    <div class="mcard ${t.metal}"><div class="medal">${medalSVG(t)}</div>
+      <div class="top"><div class="prog">מועדון הפסגה</div><div class="chip"></div></div>
+      <div style="position:relative;z-index:2"><div class="cls">${t.ico} ${t.en}<small>דרגת ${t.n} · מכפיל ×${t.mult}${u.stars?` · <span class="stars">${"★".repeat(u.stars)}</span>`:""}</small></div></div>
+      <div class="bot"><div><div class="mname">${esc(u.name)}</div><div class="since">חבר מאז ${JOINED} · מחלקה ${esc(u.dept)}</div></div>
+        <div class="bal" style="text-align:left"><b>${nf(u.balance)}</b><span>נקודות בארנק</span></div></div></div>
+    <div class="card"><div class="lab muted" style="font-size:12px;font-weight:800">${showNext?`הדרגה הבאה - ${nt.n} (${nt.en})`:invite?"הגעת לטופ פלטינה 🏆":"אתה בפסגה"} <span class="auto">מתעדכן לבד</span></div>
+      <div style="font-size:22px;font-weight:900;margin-top:4px">${showNext?`עוד ${nf(nt.min-u.career)} VVS`:invite?"טופ פלטינה 🏆 · המכפיל הגבוה ביותר":"פלטינה 🏔"}</div>
+      <div class="bar"><i style="width:${prog}%"></i></div>
+      <div class="muted" style="font-size:12px;margin-top:6px">${showNext?(r>0?`בקצב שלך (~${nf(r)} נק'/חודש) - בעוד ~${Math.max(1,Math.ceil((nt.min-u.career)/r))} חודשים`:"תעד הישגים כדי להתחיל לטפס לדרגה הבאה"):invite?"הגעת לפסגה שאפשר לצבור! המעגל הפנימי (עומר ויוראי) הוא מעמד ההנהלה, לא דרך נקודות.":"הגעת לפסגת הנקודות"}</div>
+      <div class="trail" style="margin-top:18px">${TIERS.map((x,i)=>{const done=u.career>=x.min,cur=x.k===t.k,c=x.k==="gold"?"#d9a531":x.k==="silver"?"#9aa7bd":x.k==="platinum"?"#7d8aa4":x.k==="black"?"#141b2e":"#2299b3";
+        return `<div class="st ${done?'done':''} ${cur?'cur':''}"><div class="line"></div><div class="dot" style="background:${done||cur?c:'#c7d0e0'}">${i+1}</div><div class="lbl">${x.ico} ${x.n}</div></div>`}).join("")}</div>
+      <div class="note" style="margin-top:14px">${showNext?`ב-${nt.n} תקבל מכפיל ×${nt.mult} על נקודות הערך, ו${nt.unlock}.`:invite?"טופ פלטינה - המכפיל הגבוה ×1.4 וכל הקטלוג. המעגל הפנימי שמור למנהלי המחלקות (עומר ויוראי).":"פלטינה - הקטלוג המלא + President's Club."}</div></div>
+  </div>
+  <div class="zonelbl">המספרים שלי - מתעדכנים לבד</div>
+  <div class="sec grid g4" style="margin-top:12px">
+    <div class="stat"><div class="lab">VVS (ליגה) <span class="auto">אוטומטי</span></div><div class="big">${nf(u.career)}</div><div class="sub">ערך מאומת מצטבר</div></div>
+    <div class="stat"><div class="lab">רצף <span class="auto">אוטומטי</span></div><div class="big">${u.streak}<span style="font-size:15px;color:var(--muted)"> שב'</span></div><div class="sub">שבועות תוצאה מאומתת</div></div>
+    <div class="stat"><div class="lab">הפניות פה-לאוזן <span class="auto">אוטומטי</span></div><div class="big">${u.refs}</div><div class="sub">לקוחות שנכנסו לתיק שלך</div></div>
+    <div class="stat"><div class="lab">כוכבי Horizon <span class="auto">אוטומטי</span></div><div class="big">${u.stars} <span class="stars" style="font-size:18px">${"★".repeat(u.stars)||""}</span></div><div class="sub">קייסים מאומתים</div></div>
+  </div>
+  <div class="zonelbl">הארנק שלי והצעד הבא</div>
+  <div class="sec grid g2" style="margin-top:12px">
+    <div class="card"><div style="font-weight:900;margin-bottom:4px">הארנק שלי</div>
+      <div style="font-size:34px;font-weight:900">${nf(u.balance)} <span style="font-size:15px;color:var(--muted)">נק'</span></div>
+      <div class="muted" style="font-size:13px;margin-top:4px">${pend?`⏳ ${nf(pend)} נק' ממתינות לאישור אופק - ייכנסו לארנק כשיאשר (ה-VVS והדרגה כבר עודכנו)`:"אין נקודות בהמתנה"}</div>
+      <div class="note" style="margin-top:14px;font-size:12.5px">💪 הפרסים הגדולים דורשים מסע של שנה-שנתיים - צריך לעבוד בשביל זה. הקטנים כבר בהישג יד, אבל שווה להתאפק לגדול.</div></div>
+    <div class="card"><div style="font-weight:900;margin-bottom:6px">מה מזיז לך את המחט</div>
+      <div class="muted" style="font-size:13.5px;margin-bottom:8px">הליגה עולה רק על ערך מאומת (A+B), מוכפל ×${t.mult}:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px"><span class="pill" style="color:var(--gold);border-color:var(--gold)">תוצאה ללקוח = ${nf(500*t.mult)}</span><span class="pill" style="color:var(--gold)">קייס = ${nf(350*t.mult)} + כוכב</span><span class="pill" style="color:var(--teal);border-color:var(--teal)">הפניה = ${nf(300*t.mult)} + לקוח חדש</span></div>
+      <button class="btn" onclick="switchView('log')">＋ תעד הישג עכשיו</button></div>
+  </div>
+  <div class="zonelbl">ההיסטוריה שלי - הכל שקוף</div>
+  <div class="sec" style="margin-top:12px"><div class="card"><div style="font-weight:900;margin-bottom:4px">🏔 היסטוריית המעמדים שלי</div>
+    <div class="muted" style="font-size:12.5px;margin-bottom:10px">מתי הגעת לכל דרגה, כמה VVS נצבר בכל אחת ולמה. שקוף לגמרי.</div>
+    <div id="mytierhist"></div></div></div>
+  <div class="sec grid g2">
+    <div class="card"><div style="font-weight:900;margin-bottom:8px">עץ ההפניות שלי <span class="auto">אוטומטי</span></div>
+      ${u.refs?`<div class="reftree">${Array.from({length:u.refs}).map((_,i)=>`<div class="refnode">🌱 לקוח מפנה <b>#${i+1}</b></div>`).join("")}</div><div class="muted" style="font-size:12px;margin-top:8px">הלקוחות שלך הופכים לצוות המכירות שלך.</div>`:`<div class="muted" style="font-size:13px">עדיין אין הפניות. לקוח מרוצה שמפנה = לקוח חדש ישר לתיק שלך + נקודות.</div>`}</div>
+    <div class="card"><div style="font-weight:900;margin-bottom:8px">אחרוני ההישגים <span class="self">אתה מתעד</span></div><div id="myfeed"></div></div>
+  </div>
+  <div class="sec"><div class="card"><div style="font-weight:900;margin-bottom:4px">🕒 היסטוריית ההישגים שלי - חזרה אחורה בזמן</div>
+    <div class="muted" style="font-size:12.5px;margin-bottom:12px">כל ההישגים שלך לפי סוג. לחץ על סוג לראות מה בדיוק היה - כמות ותוכן. לא ניתן למחוק, רק אופק מאשר/דוחה.</div>
+    <div id="myhistory"></div></div></div>
+  <div class="sec"><div class="card"><div style="font-weight:900;margin-bottom:4px">🎁 היסטוריית המימושים שלי</div>
+    <div class="muted" style="font-size:12.5px;margin-bottom:10px">כל הפרסים שמימשת - מתי, כמה נקודות ירדו, ומה הסטטוס מול ההנהלה.</div>
+    <div id="myredemp"></div></div></div>`;renderMyFeed();$("#mytierhist").innerHTML=renderTierHistory(u);$("#myhistory").innerHTML=renderHistory(u);$("#myredemp").innerHTML=renderRedemp(u);updateWallet();}
+function fmtDate(ts){if(!ts)return"";const d=new Date(ts);return d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear();}
+function stBadge(s){return s==="approved"?'<span class="hb ok">✓ אושר</span>':s==="rejected"?'<span class="hb no">✗ נדחה</span>':'<span class="hb pend">⏳ ממתין</span>';}
+function renderMyFeed(){const logs=(state.logs[state.me.id]||[]).slice().reverse().slice(0,6),c=$("#myfeed");
+  if(!logs.length){c.innerHTML=`<div class="muted" style="font-size:13px">עדיין לא תיעדת הישגים. כל הישג עובר לאישור אופק ואז מעלה אותך במסע.</div>`;return}
+  c.innerHTML=`<div class="feed">${logs.map(l=>{const b=l.status==="approved"?'<span class="badge ok">✓</span>':l.status==="rejected"?'<span class="badge no">✗ נדחה</span>':'<span class="badge">⏳ ממתין</span>';return `<div class="row"><span class="dot" style="background:${l.color}"></span>${l.short} ${l.client?`· ${esc(l.client)}`:""} ${b}<span class="pts">+${nf(l.pts)}</span></div>`}).join("")}</div>`;}
+function renderHistory(u){const logs=state.logs[u.id]||[],total=logs.length;
+  if(!total)return `<div class="muted" style="font-size:13px">עדיין אין הישגים בהיסטוריה. תעד את הראשון - הכל יישמר כאן ולא ניתן למחוק.</div>`;
+  const appr=logs.filter(l=>l.status==="approved").reduce((a,b)=>a+b.pts,0),pend=logs.filter(l=>l.status==="pending").length,rej=logs.filter(l=>l.status==="rejected").length;
+  const byType=TRIGGERS.map(t=>({t,items:logs.filter(l=>l.type===t.k).slice().reverse()})).filter(x=>x.items.length);
+  return `<div class="muted" style="font-size:12.5px;margin-bottom:10px">סה"כ <b>${total}</b> הישגים · ${nf(appr)} נק' מאושרות · ${pend} ממתינים · ${rej} נדחו. <b>לא ניתן למחוק</b> - רק אופק מאשר/דוחה.</div>
+    ${byType.map(({t,items})=>{const sum=items.reduce((a,b)=>a+b.pts,0);
+      return `<details class="htype"><summary><span class="sdot" style="background:${t.color}"></span><b>${t.label.split(" · ")[1].split(" (")[0]}</b><span class="cnt">${items.length} הישגים · ${nf(sum)} נק'</span></summary>
+        <div class="hlist">${items.map(l=>`<div class="hitem"><div><div class="hc">${esc(l.client||"בלי פרטים")}${l.details?` · ${esc(l.details)}`:""}${l.val?` · ${esc(l.val)} ₪`:""}</div><div class="hd">${fmtDate(l.ts)} · דרגת ${l.tierAt||"-"}</div></div><div class="hr">${stBadge(l.status)}<span class="hp">+${nf(l.pts)}</span></div></div>`).join("")}</div></details>`}).join("")}`;}
+function estCross(u,min){const r=rate(u);if(r<=0||min<=0)return"נקודת הפתיחה";const ago=monthsOf(u)-min/r;if(ago<0)return"בקרוב";const d=new Date();d.setMonth(d.getMonth()-Math.round(ago));return"הושג ~"+MONTHS[d.getMonth()]+" "+d.getFullYear();}
+function renderTierHistory(u){const reached=TIERS.filter(t=>u.career>=t.min&&t.min<99999999);
+  return reached.map(t=>{const idx=TIERS.indexOf(t),next=TIERS[idx+1],hasNext=next&&u.career>=next.min,bandTop=hasNext?next.min:u.career,band=Math.max(0,bandTop-t.min),cur=!hasNext;
+    return `<div class="throw ${t.metal}${cur?' cur':''}"><div class="ti">${t.ico}</div><div class="tinfo"><div><b>${t.n}</b>${cur?' <span class="hereb">📍 אתה כאן</span>':''} <span style="font-size:11.5px;opacity:.8">· ${estCross(u,t.min)}</span></div><div class="tw">נצבר בדרגה: <b>${nf(band)} VVS</b>${cur?" (עדיין מתמלא)":""}${t.mult?" · כל הישג הוכפל ×"+t.mult:""}</div></div></div>`}).join("")+
+    `<div class="muted" style="font-size:11.5px;margin-top:8px">ה-VVS בכל דרגה מגיע מהישגי ערך מאומתים (A תוצאה ללקוח + B מותג/הפניה). ככל שהדרגה גבוהה יותר - כל הישג שווה יותר נקודות (מכפיל גבוה).</div>`;}
+
+function pendingList(){const out=[];USERS.forEach(u=>{if(u.admin||u.coach)return;(state.logs[u.id]||[]).forEach(l=>{if(l.status==="pending")out.push({u,l})})});return out;}
+function renderAdmin(){const players=USERS.filter(u=>!u.admin),pend=pendingList(),rq=redempList();
+  $("#v-dash").innerHTML=`<div class="sec"><div class="kick">מסך אדמין - אופק</div><h1>אישורים ומבט-על</h1>
+  <div class="note">כל אחד יכול להיכנס ולתעד - אבל <b>כל הישג עובר אליך לאישור</b>. סמן ✓ (מאשר, ננעל) או ✗ (דוחה, הנקודות מוסרות). ככה אף אחד לא מזין שטויות ולא מעדכן עבור אחר.</div>
+  <div class="sec"><div class="kick">תור אישורים ${pend.length?`(${pend.length})`:""}</div>
+    ${pend.length?`<div class="appr">${pend.map(({u,l})=>`<div class="row"><span class="av" style="background:${u.color}">${esc(initials(u.name))}</span>
+      <div class="info"><b>${esc(u.name)}</b> · ${l.short}<div class="d">${esc(l.client||"בלי פרטים")}${l.details?" · "+esc(l.details):""}${l.val?" · "+esc(l.val)+" ₪":""}</div></div>
+      <span class="pts">+${nf(l.pts)}</span><div class="acts"><button class="ok" title="אשר" onclick="approveLog('${u.id}',${l.id})">✓</button><button class="no" title="דחה" onclick="rejectLog('${u.id}',${l.id})">✗</button></div></div>`).join("")}</div>`
+    :`<div class="card"><div class="muted">אין הישגים שממתינים לאישור. הכל מעודכן. 👌</div></div>`}
+  </div>
+  <div class="sec"><div class="kick">בקשות מימוש פרסים ${rq.length?`(${rq.length})`:""}</div>
+    ${rq.length?`<div class="appr">${rq.map(({u,r})=>`<div class="row"><span class="av" style="background:${u.color}">${esc(initials(u.name))}</span>
+      <div class="info"><b>${esc(u.name)}</b> · 🎁 ${esc(r.name)}<div class="d">${fmtDate(r.ts)} · ${nf(r.cost)} נק' כבר ירדו מהארנק שלו</div></div>
+      <div class="acts"><button class="ok" title="סופק" onclick="fulfillRedemp('${u.id}',${r.id})">✓ סופק</button><button class="no" title="דחה והחזר נקודות" onclick="denyRedemp('${u.id}',${r.id})">✗</button></div></div>`).join("")}</div>`
+    :`<div class="card"><div class="muted">אין בקשות מימוש פתוחות. כשעובד מממש פרס - הבקשה תגיע לכאן לאספקה.</div></div>`}
+  </div>
+  ${deptVs()}
+  <div class="sec"><div class="kick">דירוג אישי</div>${leadTable(players.filter(p=>!p.coach),true)}</div>
+  <div class="sec"><div class="kick">מנהלי מחלקה</div>${leadTable(players.filter(p=>p.coach),true)}</div></div>`;updateWallet();}
+function refreshApprovals(){if(state.me&&state.me.admin)renderAdmin();else if(state.me&&state.me.coach)renderCoach();}
+function canApprove(u){return !!(state.me&&u&&state.me.id!==u.id&&(state.me.admin||(state.me.coach&&state.me.dept===u.dept&&!u.coach)));}
+function approveLog(uid,id){const u=USERS.find(x=>x.id===uid),l=(state.logs[uid]||[]).find(x=>x.id===id);if(!u||!l||l.status!=="pending"||!canApprove(u))return;
+  l.status="approved";u.balance+=l.pts;if(l.vvs)u.career+=l.pts;u.refs+=(l.addedRefs||0);u.streak+=(l.addedStreak||0);u.stars+=(l.addedStars||0);save();celebrate("✓ אושר · "+nf(l.pts)+" נק' נכנסו לארנק");refreshApprovals();}
+function rejectLog(uid,id){const u=USERS.find(x=>x.id===uid),l=(state.logs[uid]||[]).find(x=>x.id===id);if(!u||!l||l.status!=="pending"||!canApprove(u))return;
+  l.status="rejected";save();refreshApprovals();/* כלום לא נכנס לפני אישור - אין מה לקזז */}
+function teamPending(dep){const out=[];USERS.forEach(u=>{if(u.admin||u.coach||u.dept!==dep)return;(state.logs[u.id]||[]).forEach(l=>{if(l.status==="pending")out.push({u,l})})});return out;}
+function renderCoach(){const c=state.me,tp=teamPending(c.dept),team=USERS.filter(x=>!x.admin&&!x.coach&&x.dept===c.dept);
+  $("#v-dash").innerHTML=`<div class="sec"><div class="kick">מנהל מחלקה ${esc(c.dept)} - ${esc(c.name)}</div><h1>הצוות שלי + אישורים</h1>
+  <div class="note">אתה מסנן ומאשר את ההישגים של הצוות שלך (${team.map(t=>esc(t.name)).join(" · ")}). אישור מכניס את הנקודות לארנק של העובד; אופק רואה הכל מעליך.</div>
+  <div class="sec"><div class="kick">תור אישורים - הצוות שלי ${tp.length?`(${tp.length})`:""}</div>
+    ${tp.length?`<div class="appr">${tp.map(({u,l})=>`<div class="row"><span class="av" style="background:${u.color}">${esc(initials(u.name))}</span>
+      <div class="info"><b>${esc(u.name)}</b> · ${l.short}<div class="d">${esc(l.client||"בלי פרטים")}${l.details?" · "+esc(l.details):""}${l.val?" · "+esc(l.val)+" ₪":""}</div></div>
+      <span class="pts">+${nf(l.pts)}</span><div class="acts"><button class="ok" title="אשר" onclick="approveLog('${u.id}',${l.id})">✓</button><button class="no" title="דחה" onclick="rejectLog('${u.id}',${l.id})">✗</button></div></div>`).join("")}</div>`
+    :`<div class="card"><div class="muted">אין הישגים שממתינים לאישור בצוות שלך. 👌</div></div>`}
+  </div>
+  ${deptVs()}
+  <div class="sec"><div class="kick">הצוות שלי</div>${leadTable(team)}</div></div>`;updateWallet();}
+
+function renderLog(){const u=state.me;
+  if(u.admin||u.coach){$("#v-log").innerHTML=`<div class="sec"><h1>תיעוד הישג</h1><div class="note">${u.admin?"אדמין - התיעוד האישי הוא של מנהלי הכספים. אתה מאשר במסך 'המסע שלי'.":"מנהל מחלקה - התיעוד האישי הוא של מנהלי הכספים."}</div></div>`;return}
+  $("#v-log").innerHTML=`<div class="sec"><div class="kick">אתה מתעד - רק את עצמך</div><h1>תעד הישג</h1>
+  <div class="muted" style="font-size:14px;max-width:640px">בחר סוג, מלא פרטים. ההישג נכנס <b>ממתין לאישור אופק</b> (✓/✗), ואז נספר.</div>
+  <div class="card" style="max-width:640px;margin-top:16px">
+    <div class="field"><label>סוג ההישג</label><select id="lgType" onchange="lgPreview()">${TRIGGERS.map(t=>`<option value="${t.k}">${t.label}</option>`).join("")}</select><div class="hint" id="lgNote"></div></div>
+    <div class="field"><label>שם לקוח <span style="color:#d9534f">*</span></label><input id="lgClient" placeholder="למשל: יבואן מזון בע״מ" oninput="$('#lgErr').style.display='none'"></div>
+    <div class="field"><label>פרטי ההישג <span style="color:#d9534f">*</span></label><input id="lgDetails" placeholder="מה בדיוק קרה (למשל: איחוד הלוואות, -55% במימון)" oninput="$('#lgErr').style.display='none'"></div>
+    <div class="field"><label>ערך משוער (₪) <span class="muted">- אופציונלי</span></label><input id="lgVal" placeholder="למשל 214,000" inputmode="numeric"></div>
+    <div style="margin-top:14px;font-size:14px">שווי בנקודות: <span class="ptsPreview" id="lgPts"></span></div>
+    <div id="lgErr" style="display:none;color:#d9534f;font-size:13px;font-weight:700;margin-top:10px">חובה למלא גם שם לקוח וגם פרטי ההישג.</div>
+    <button class="btn" onclick="submitLog()">＋ שלח לאישור</button>
+    <div class="hint">אתה מעדכן רק את עצמך. עמלות, וותק ודירוג הליגה מתעדכנים אוטומטית.</div></div>
+  <div class="sec"><div class="card"><div style="font-weight:900;margin-bottom:10px">💡 דוגמאות - מה נחשב לכל סוג הישג</div>
+    ${TRIGGERS.map(t=>`<div style="margin-bottom:11px;border-bottom:1px solid var(--line);padding-bottom:9px"><b style="color:${t.color}">${t.label.split(" · ")[1]}</b> <span class="pill">${nf(t.pts)} נק'</span><ul style="margin:5px 20px 0;color:var(--ink2);font-size:13px;line-height:1.7">${(t.ex||[]).map(e=>`<li>${e}</li>`).join("")}</ul></div>`).join("")}
+    <div class="muted" style="font-size:12px">כל הישג עובר אישור לפני שהנקודות נכנסות לארנק. תוצאה ללקוח (A) שווה הכי הרבה - זה הלב.</div>
+  </div></div></div>`;lgPreview();}
+function lgPreview(){const u=state.me,t=TRIGGERS.find(x=>x.k==$("#lgType").value),m=t.vvs?tierOf(u.career).mult:1,g=Math.round(t.pts*m);
+  $("#lgPts").textContent="+"+nf(g)+" נק'"+(t.vvs?` (כולל מכפיל דרגה ×${m}) · עולה בליגה`:" · ארנק בלבד");$("#lgNote").textContent=t.note+(t.ex&&t.ex[0]?" · לדוגמה: "+t.ex[0]:"");}
+function submitLog(){const u=state.me;if(!u||u.admin||u.coach)return;const t=TRIGGERS.find(x=>x.k==$("#lgType").value),client=$("#lgClient").value.trim(),details=$("#lgDetails").value.trim(),val=$("#lgVal").value.trim(),m=t.vvs?tierOf(u.career).mult:1,g=Math.round(t.pts*m);
+  if(!client||!details){$("#lgErr").style.display="block";return;}
+  const aR=t.k==="B_ref"?1:0,aS=(t.k==="A"||t.k==="A_p90"||t.k==="B_case")?1:0,aStars=t.k==="B_case"?1:0;
+  (state.logs[u.id]=state.logs[u.id]||[]).push({id:++state.seq,type:t.k,short:t.label.split(" · ")[0]+" · "+t.label.split(" · ")[1].split(" (")[0],pts:g,vvs:t.vvs,client,details,val,color:t.color,status:"pending",ts:Date.now(),tierAt:userTier(u).n,addedRefs:aR,addedStreak:aS,addedStars:aStars});
+  save();/* כלום לא נספר עד אישור - לא ארנק ולא VVS/דרגה/תחרות. מוצג כ"ממתין". */
+  celebrate(t.k==="B_case"?"⭐ נשלח לאישור - כוכב בדרך!":t.k==="B_ref"?"🌱 הפניה נשלחה לאישור":"🔥 נשלח לאישור · +"+nf(g)+" נק' (ממתין)");switchView("dash");}
+
+/* ---- Marshmallow tempt popup ---- */
+function findSmallAffordable(u){const ti=tierIdx(u.career);return PRIZES.filter(p=>ti>=p.minTier&&u.balance>=p.p&&p.p<=8000).sort((a,b)=>a.p-b.p)[0]||null;}
+function bigGoal(){return PRIZES.find(p=>p.n.indexOf("טיסה")>=0)||PRIZES[PRIZES.length-1];}
+function maybeTempt(){const u=state.me;if(!u||u.admin||u.coach)return;const small=findSmallAffordable(u);if(!small)return;
+  const big=bigGoal(),need=Math.max(0,big.p-u.balance),r=rate(u),eta=r>0?Math.ceil(need/r):0,sn=small.n.replace(/["']/g,"");
+  $("#modalBody").innerHTML=`<div class="mm">🍬</div><h3>רגע - מבחן המרשמלו</h3>
+    <div class="sub">יש לך <b>${nf(u.balance)}</b> נק'. אתה יכול לקחת פרס קטן <b>עכשיו</b>... או להתאפק ולהמשיך לגדול. ההחלטה שלך.</div>
+    <div class="two">
+      <div class="opt now"><div class="im"><div class="fb">${icon(small.ic)}</div><img src="${small.img}" onerror="this.style.display='none'"></div>
+        <div class="t">${small.n}</div><div class="p">עכשיו · ${nf(small.p)} נק'</div>
+        <button onclick="temptRedeem(${small.p},'${sn}')">קח עכשיו 🎁</button><div class="why">מיידי, אבל קטן</div></div>
+      <div class="opt wait"><div class="im"><div class="fb">${icon(big.ic)}</div><img src="${big.img}" onerror="this.style.display='none'"></div>
+        <div class="t">${big.n}</div><div class="p">עוד ${nf(need)} נק'${eta>0?` · ~${eta} ח'`:""}</div>
+        <button onclick="temptWait()">אני ממתין 💪</button><div class="why">שווה פי כמה. סבלנות = פסגה.</div></div>
+    </div>
+    <button class="skip" onclick="closeModal()">אחליט אחר כך</button>`;
+  $("#modal").classList.add("show");}
+function closeModal(){$("#modal").classList.remove("show");}
+function temptRedeem(cost,name){closeModal();const u=state.me;if(u.balance>=cost){u.balance-=cost;(state.redemp[u.id]=state.redemp[u.id]||[]).push({id:++state.seq,name,cost,ts:Date.now(),status:"requested"});save();celebrate("🎁 בקשת מימוש נשלחה! בפעם הבאה אולי תחכה לגדול 😉");$("#v-prizes").classList.contains("hidden")?renderDash():renderPrizes();}}
+function temptWait(){closeModal();celebrate("💪 כבוד! סבלנות משתלמת - אתה בדרך לפסגה");}
+
+let boardFilter="all";
+function deptVs(){const a=deptScore("A"),b=deptScore("B"),tot=a+b,ap=tot?a/tot*100:50,lead=a>=b?"A · יוראי":"B · עומר",gap=Math.abs(a-b);
+  const goal=170000,floor=70000,combined=a+b,gp=Math.min(100,combined/goal*100),bothOver=a>=floor&&b>=floor;
+  return `<div class="sec"><div class="kick">תחרות קבוצתית - מה יוצא לכם מזה</div><div class="card"><div style="font-weight:900;margin-bottom:8px">מחלקה מול מחלקה 🏆</div>
+    <div class="vs"><div class="team a"><div class="tt">מחלקה A · יוראי</div><div class="sc">${nf(a)}</div><div class="mm">שוהם · אושרי · עידו</div></div>
+      <div class="mid">VS</div>
+      <div class="team b"><div class="tt">מחלקה B · עומר</div><div class="sc">${nf(b)}</div><div class="mm">בן חזן · אריק · טלי · עידו נחום</div></div></div>
+    <div class="vsbar"><div class="a" style="width:${ap}%"></div><div class="b" style="width:${100-ap}%"></div></div>
+    <div class="muted" style="font-size:12.5px;margin-top:8px">מובילה כרגע: <b>מחלקה ${lead}</b> (פער ${nf(gap)} VVS). סך VVS מאומת של כל חברי המחלקה. מתחרים אישית, מנצחים ביחד.</div>
+    <div style="font-weight:800;font-size:13px;margin-top:12px">📅 תיעוד רבעוני - כל רבעון נמדד בנפרד ומתאפס:</div>
+    <div class="tblwrap"><table class="qtable"><thead><tr><th>רבעון</th><th>מחלקה A</th><th>מחלקה B</th><th>מנצחת</th></tr></thead><tbody>
+      <tr><td>Q3 2026 (רבעון פתיחה)</td><td>${nf(a)}</td><td>${nf(b)}</td><td class="win">${a===0&&b===0?"נפתח 0:0":lead.split(" ")[0]+" מוביל/ה"}</td></tr>
+    </tbody></table></div>
+    <div class="deptprize">🍽️ <b>פרס מחלקה מובילה - רבעוני:</b> המחלקה שמנצחת ברבעון מקבלת <b>1,000 ₪</b> לארוחה מחלקתית או פעילות שתבחרו (אפשר להוסיף מהכיס לשדרג) + יתרון בטיסת הפסגה השנתית.</div>
+    <div style="margin-top:10px;background:linear-gradient(135deg,#eef8fb,#e3f2f7);border:1px solid #bfe4ec;border-radius:12px;padding:12px 14px;color:#1d4a56">
+      <div style="font-weight:900;margin-bottom:4px">🤝 יעד משותף - שתי המחלקות ביחד</div>
+      <div class="bar" style="margin:8px 0"><i style="width:${gp}%"></i></div>
+      <div style="font-size:12.5px">${nf(combined)} / ${nf(goal)} VVS משולב${bothOver?" · שתיכן עברתן את הרף!":` · (כל מחלקה חייבת לעבור ${nf(floor)})`}. כששתי המחלקות מגיעות יחד לרף - <b>כל הצוות + אופק יוצאים לחוויה קבוצתית</b> (יום גיבוש/טיול), בלי קשר לנקודות האישיות.</div>
+      <div style="font-size:12px;margin-top:6px;color:#3a6b76">💪 ביחד זה כוח. אין כאן מנצחים ומפסידים - כל הישג של כל אחד מקרב את כולם. ככל שנדחוף יד ביד, נגיע מהר יותר לרף, וכולנו טסים ביחד.</div></div>
+    </div></div>`;}
+function renderBoard(){$("#v-board").innerHTML=`<div class="sec"><div class="kick">כולם רואים · עולים ביחד</div><h1>קיר האלופים</h1>
+  ${deptVs()}
+  <div class="sec"><div class="kick">תחרות אישית</div>
+  <div class="muted" style="font-size:14px">דירוג לפי <b>VVS</b> - ערך מאומת בלבד (תוצאה ללקוח + מותג).</div>
+  <div class="tabs"><button class="on" data-f="all" onclick="setF(this)">כל הפסגה</button><button data-f="A" onclick="setF(this)">מחלקה A</button><button data-f="B" onclick="setF(this)">מחלקה B</button></div>
+  <div id="boardWrap"></div><div class="note" style="margin-top:16px">רק עליות מוצגות פומבית - אין תחתית טבלה, אין השפלה.</div></div></div>`;drawBoard();updateWallet();}
+function setF(b){document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("on"));b.classList.add("on");boardFilter=b.dataset.f;drawBoard();}
+function drawBoard(){let p=USERS.filter(u=>!u.admin&&!u.coach);if(boardFilter!=="all")p=p.filter(x=>x.dept===boardFilter);$("#boardWrap").innerHTML=leadTable(p);}
+function leadTable(players,coach){players=players.slice().sort((a,b)=>b.career-a.career);
+  const rows=players.map((p,i)=>{const t=userTier(p),me=state.me&&p.id===state.me.id,tr=(monthsOf(p)<=2||i<3)?"up":"flat";
+    return `<tr class="${me?'me':''}"><td class="rk ${i<3?'top':''}">${i+1}</td>
+      <td><div class="who"><span class="av" style="background:${p.color}">${esc(initials(p.name))}</span>${esc(p.name)}${p.stars?` <span class="stars">${"★".repeat(p.stars)}</span>`:""}${me?' <span class="pill">אתה</span>':''}</div></td>
+      <td><span class="tierbadge ${t.metal}">${t.ico} ${t.n}</span></td><td style="font-weight:900">${nf(p.career)}</td>
+      <td>${coach?nf(p.balance):`<span class="trend ${tr}">${tr==="up"?"▲ עולה":"- יציב"}</span>`}</td></tr>`}).join("");
+  return `<div class="tblwrap"><table class="lead"><thead><tr><th>#</th><th>מנהל</th><th>דרגה</th><th>VVS</th><th>${coach?"ארנק":"מגמה"}</th></tr></thead><tbody>${rows}</tbody></table></div>`;}
+
+function icon(k){const I={
+  gift:'<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="12" rx="1.5" fill="#f6894f"/><rect x="3" y="9" width="18" height="3.5" fill="#e0743d"/><rect x="11" y="6" width="2" height="15" fill="#fff"/><path d="M12 6c-2-3-6-2-4 0h4zm0 0c2-3 6-2 4 0h-4z" fill="#fff"/></svg>',
+  airpods:'<svg viewBox="0 0 24 24" fill="none"><rect x="6" y="3" width="4" height="9" rx="2" fill="#3a4358"/><rect x="14" y="3" width="4" height="9" rx="2" fill="#3a4358"/><rect x="6.5" y="12" width="3" height="7" rx="1.5" fill="#8b97b5"/><rect x="14.5" y="12" width="3" height="7" rx="1.5" fill="#8b97b5"/></svg>',
+  spa:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 21c-4-3-7-6-7-10a4 4 0 018 0 4 4 0 018 0c0 4-3 7-9 10z" fill="#f6894f" opacity=".85"/><circle cx="12" cy="8" r="2" fill="#fff"/></svg>',
+  hotel:'<svg viewBox="0 0 24 24" fill="none"><path d="M3 20V9l9-5 9 5v11" stroke="#2299b3" stroke-width="1.6" fill="#dff1f5"/><rect x="8" y="12" width="8" height="8" fill="#f6894f"/><rect x="10.5" y="15" width="3" height="5" fill="#fff"/></svg>',
+  watch:'<svg viewBox="0 0 24 24" fill="none"><rect x="7" y="6" width="10" height="12" rx="3" fill="#3a4358"/><rect x="9" y="2" width="6" height="4" rx="1" fill="#8b97b5"/><rect x="9" y="18" width="6" height="4" rx="1" fill="#8b97b5"/><circle cx="12" cy="12" r="2.4" fill="#5ac6dc"/></svg>',
+  ipad:'<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="2" width="14" height="20" rx="2.5" fill="#3a4358"/><rect x="7" y="4.5" width="10" height="14" fill="#dfe6f0"/></svg>',
+  iphone:'<svg viewBox="0 0 24 24" fill="none"><rect x="7" y="2" width="10" height="20" rx="2.5" fill="#3a4358"/><rect x="8.5" y="5" width="7" height="12" fill="#dfe6f0"/></svg>',
+  mac:'<svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="11" rx="1.5" fill="#3a4358"/><rect x="5.5" y="5.5" width="13" height="8" fill="#dfe6f0"/><path d="M2 18h20l-1.5 2H3.5L2 18z" fill="#8b97b5"/></svg>',
+  plane:'<svg viewBox="0 0 24 24" fill="none"><path d="M2 14l20-7-7 20-3.5-7L2 14z" fill="#f6894f"/></svg>',
+  beach:'<svg viewBox="0 0 24 24" fill="none"><circle cx="17" cy="7" r="3" fill="#f6b24f"/><path d="M2 20h20" stroke="#2299b3" stroke-width="2"/><path d="M6 20c0-4 3-7 7-7" stroke="#25b877" stroke-width="2"/></svg>',
+  car:'<svg viewBox="0 0 24 24" fill="none"><path d="M3 15l2-5h14l2 5v3H3v-3z" fill="#f6894f"/><path d="M6 10l1.5-3h9L18 10" stroke="#2299b3" stroke-width="1.4"/><circle cx="7" cy="18" r="1.8" fill="#3a4358"/><circle cx="17" cy="18" r="1.8" fill="#3a4358"/></svg>',
+  coffee:'<svg viewBox="0 0 24 24" fill="none"><path d="M4 8h12v6a4 4 0 01-4 4H8a4 4 0 01-4-4V8z" fill="#3a4358"/><path d="M16 9h2.5a2.5 2.5 0 010 5H16" stroke="#8b97b5" stroke-width="1.6" fill="none"/><path d="M7 2.5c-.6 1 .6 1.8 0 3M11 2.5c-.6 1 .6 1.8 0 3" stroke="#f6894f" stroke-width="1.4" fill="none"/></svg>'};return I[k]||I.gift;}
+function renderPrizes(){const u=state.me,bal=u.admin?0:u.balance,r=u.admin?0:rate(u),uti=u.admin?4:tierIdx(u.career);
+  $("#v-prizes").innerHTML=`<div class="sec"><div class="kick">מה אפשר לזכות</div><h1>קטלוג הפרסים</h1>
+  <div class="note" style="margin-top:6px;max-width:760px">💡 אפשר לממש פרס קטן כבר עכשיו - אבל <b>שווה הרבה יותר לחכות</b>. כל נקודה שתחסוך מקרבת אותך לפרס הגדול. ככל שעולים בדרגה נפתחים פרסים חדשים.</div>
+  ${u.admin?"":`<div class="muted" style="font-size:14px;margin-top:10px">הארנק שלך: <b style="color:var(--ink)">${nf(bal)}</b> נק' · דרגת ${tierOf(u.career).n}.</div>`}
+  <div class="prizes" style="margin-top:16px">${PRIZES.map((pz,pi)=>{const unlocked=uti>=pz.minTier,can=unlocked&&bal>=pz.p,need=pz.p-bal,eta=r>0&&need>0?Math.ceil(need/r):0,prog=Math.min(100,bal/pz.p*100);
+    return `<div class="prize ${pz.cls} ${!unlocked?'locked':''}">${pz.cls==="halo"?'<div class="band halo">הילה</div>':''}
+      ${!unlocked?`<div class="lockchip">🔒 נפתח ב${TIERS[pz.minTier].n}</div>`:""}
+      <div class="ic"><div class="fb">${icon(pz.ic)}</div><img src="${pz.img}" alt="" loading="lazy" onerror="this.style.display='none'"></div>
+      <div class="nm">${pz.n}</div><div class="pts">${nf(pz.p)} <span style="font-size:12px;color:var(--muted)">נק'</span></div><div class="eta">${pz.band}</div>
+      ${u.admin?"":`<div class="bar" style="margin-top:8px"><i style="width:${prog}%"></i></div>
+      <div class="eta">${!unlocked?`דורש דרגת ${TIERS[pz.minTier].n}`:can?"✅ אפשר לממש - אבל אולי כדאי לחסוך":`עוד ${nf(need)} נק'${eta>0?` · ~${eta} ח'`:""}`}</div>
+      <button class="redeem ${can?'can':'cant'}" ${can?`onclick="this.disabled=true;redeem(${pi})"`:"disabled"}>${!unlocked?"נעול":can?"ממש פרס":"עוד לא"}</button>`}
+    </div>`}).join("")}</div>
+  <div class="note" style="margin-top:16px">💪 כל נקודה שתחסוך מקרבת אותך לפרס הגדול. אפשר קטן עכשיו - אבל שווה להתאפק.</div></div>`;updateWallet();}
+function redeem(pi){const u=state.me;if(!u||u.admin||u.coach)return;const pz=PRIZES[pi];if(!pz)return;const cost=pz.p,name=pz.n;
+  syncFromStorage(u);/* מגן מפני מימוש כפול מטאב ישן - קוראים את היתרה העדכנית מהאחסון */
+  if(u.balance<cost)return;u.balance-=cost;
+  (state.redemp[u.id]=state.redemp[u.id]||[]).push({id:++state.seq,rid:uid4(),name,cost,ts:Date.now(),status:"requested"});save();
+  celebrate("🎁 בקשת מימוש נשלחה להנהלה! "+nf(cost)+" נק' ירדו מהארנק. הפרס בדרך אליך.");renderPrizes();}
+function redempList(){const out=[];USERS.forEach(u=>{if(u.admin)return;(state.redemp[u.id]||[]).forEach(r=>{if(r.status==="requested")out.push({u,r})})});return out;}
+function fulfillRedemp(uid,id){if(!state.me||!state.me.admin)return;const r=(state.redemp[uid]||[]).find(x=>x.id===id);if(r&&r.status==="requested"){r.status="fulfilled";save();celebrate("✓ סומן כסופק");renderAdmin();}}
+function denyRedemp(uid,id){if(!state.me||!state.me.admin)return;const u=USERS.find(x=>x.id===uid),r=(state.redemp[uid]||[]).find(x=>x.id===id);if(u&&r&&r.status==="requested"){r.status="denied";u.balance+=r.cost;save();celebrate("↩ הבקשה נדחתה, הנקודות הוחזרו");renderAdmin();}}
+function renderRedemp(u){const rs=(state.redemp[u.id]||[]).slice().reverse();
+  if(!rs.length)return `<div class="muted" style="font-size:13px">עדיין לא מימשת פרסים. כשתממש - הבקשה תישלח להנהלה לאספקה ותופיע כאן.</div>`;
+  return `<div class="feed">${rs.map(r=>{const st=r.status==="fulfilled"?["ok","✓ סופק"]:r.status==="denied"?["no","↩ נדחה (הוחזר)"]:["pend","⏳ בטיפול ההנהלה"];return `<div class="row"><span class="dot" style="background:#f6894f"></span>🎁 ${esc(r.name)} <span class="hb ${st[0]}">${st[1]}</span><span style="font-size:11px;color:var(--muted);margin-inline-start:8px">${fmtDate(r.ts)}</span><span class="pts" style="color:${r.status==="denied"?"var(--good)":"var(--red)"};margin-inline-start:auto">${r.status==="denied"?"+":"-"}${nf(r.cost)}</span></div>`}).join("")}</div>`;}
+
+function renderRules(){$("#v-rules").innerHTML=`<div class="sec"><div class="kick">איך זה עובד</div><h1>המסע לפסגה - הכללים</h1>
+  <div class="sec"><div class="kick">דרגות המעמד</div><h1 style="font-size:22px">כמו נוסע מתמיד - ככל שעולים, מקבלים יותר</h1>
+    <div class="muted" style="font-size:14px;max-width:720px">כל דרגה נותנת <b>מכפיל נקודות</b> גבוה יותר ו<b>פותחת פרסים חדשים</b>. הדרגה נשמרת עם requalification שנתי - הפחד לאבד דרגה שומר אותך חד.</div>
+    <div class="tiershow">${TIERS.map((t,i)=>`<div class="tcard ${t.metal}"><div style="font-size:36px;text-align:center;line-height:1">${t.ico}</div><div class="tn">${t.n}</div><div class="te">${t.en}</div>
+      <div class="thr">${t.min===0?"דרגת פתיחה":t.min>=99999999?"בהזמנה בלבד":"מ-"+nf(t.min)+" VVS"}</div>
+      <div class="newhere">🔓 ${t.newHere}</div>
+      <div class="mult">${t.mult?"מכפיל ×"+t.mult:"מעמד הנהלה"}</div></div>`).join("")}</div>
+  </div>
+  <div class="sec grid g2">
+    <div class="card"><div style="font-weight:900;margin-bottom:8px">מה מתעדכן לבד <span class="auto">אוטומטי</span></div>
+      <ul style="margin:0;padding-inline-start:18px;color:var(--ink2);font-size:14px;line-height:1.9"><li>העמלה החודשית מהתיק שלך</li><li>נקודות וותק לקוח - כל עוד הלקוח בריא</li><li>דירוג הליגה, ה-VVS ותחרות המחלקות</li><li>טיימר הבשלה והרצף</li><li>עץ ההפניות</li></ul></div>
+    <div class="card"><div style="font-weight:900;margin-bottom:8px">מה אתה מעדכן <span class="self">אתה מתעד</span></div>
+      <ul style="margin:0;padding-inline-start:18px;color:var(--ink2);font-size:14px;line-height:1.9"><li>תוצאה מדידה ללקוח (A)</li><li>קייס / המלצה / ביקורת / הפניה (B)</li><li>קרוס-סייל לחטיבה: אשראי/מועדון/טק/אקדמיה (C)</li><li>NPS / מודל אופק 360 (D)</li><li><b style="color:var(--gold)">רק את עצמך</b> - והכל עובר לאישור אופק ✓/✗</li></ul></div>
+  </div>
+  <div class="sec grid g3">
+    <div class="stat"><div class="lab">תחרות כפולה</div><div style="font-size:14px;margin-top:6px">אישית (דרגה+פרסים) + מחלקה מול מחלקה: המובילה ברבעון = 1,000 ₪ לארוחה/פעילות, ושתי המחלקות ביחד → חוויה קבוצתית לכולם.</div></div>
+    <div class="stat"><div class="lab">דחיית סיפוקים</div><div style="font-size:14px;margin-top:6px">אפשר פרס קטן מהר - אבל שווה לעבוד ולחכות לגדול. הגדולים דורשים שנה-שנתיים.</div></div>
+    <div class="stat"><div class="lab">אימות והוגנות</div><div style="font-size:14px;margin-top:6px">כל הישג עובר אישור לפני שהנקודות נכנסות לארנק. שקוף, מבוקר, והוגן לכולם.</div></div>
+  </div></div>`;updateWallet();}
+
+let toastT;
+function celebrate(msg){const t=$("#toast");t.innerHTML="🎉 "+msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),3000);confetti();}
+function confetti(){const c=$("#confetti"),ctx=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;
+  const cols=["#f6894f","#2299b3","#25b877","#d9a531","#9a6ff0"];
+  let ps=Array.from({length:120},()=>({x:innerWidth/2+(Math.random()-.5)*220,y:innerHeight/2,vx:(Math.random()-.5)*10,vy:Math.random()*-12-4,g:.4,r:Math.random()*6+3,c:cols[Math.floor(Math.random()*cols.length)],a:1}));
+  let f=0;(function anim(){ctx.clearRect(0,0,c.width,c.height);f++;ps.forEach(p=>{p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.a-=.013;ctx.globalAlpha=Math.max(0,p.a);ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,p.r,p.r)});if(f<85)requestAnimationFrame(anim);else ctx.clearRect(0,0,c.width,c.height)})();}
+</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
+</body>
+</html>
