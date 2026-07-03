@@ -401,7 +401,7 @@ const MONTHS=["ינו","פבר","מרץ","אפר","מאי","יונ","יול","א
 const state={me:null,logs:{},redemp:{},seq:0};
 const ADMIN_PIN="124456";let pendingAdmin=null;
 const OVERRIDE=0.15;/* מנהל מחלקה צובר 15% מכל הישג מאושר של הצוות שלו - מנצח כשהצוות מנצח */
-const PT_ILS=0.14;/* שווי משוער לנקודה בפרסים (מבוסס מחירי שוק בישראל 2026: אייפון 16 ~3,989₪=28k נק') */
+const PT_ILS=0.17;/* שווי פרס מוצג למנהל (מנופח מעט מעל מחיר השוק - התלהבות + תפיסת ערך; העלות בפועל לחברה נמוכה יותר) */
 const CASH_KEEP=0.65;/* המרה לכסף במקום פרס = 65% מהשווי (ניכוי 35%) - עוגן פסיכולוגי, עדיף פרס */
 function ils(pts){return Math.round(pts*PT_ILS);}
 const COACH_TRIGGERS=[
@@ -417,6 +417,30 @@ const TRIG_CATS=[
   ["מותג והפניות",["B_case","B_ref","B_rev"]],
   ["צוות וקרוס-סייל",["S_training","C_cross","D_nps"]]
 ];
+// בנק דוגמאות עשיר לכל סוג הישג - להשראה ולדחיפה לחשוב מה עוד אפשר לתת
+const EXBANK={
+  R_year:["לקוח שהשלים 12 חודשי ריטיינר רצופים בניהולך","חידוש לשנה שנייה - הלקוח בחר להישאר איתך","שנה שלמה של ליווי חודשי שהבשילה לאמון עמוק","לקוח ותיק שממשיך שנה אחר שנה - עוגן של המחלקה","לקוח שעבר איתך שנה עם תוצאות מוכחות בפלאסטו"],
+  R_half:["לקוח שהשלים 6 חודשי ריטיינר רצופים","אמצע השנה של הלקוח - תחנה בדרך ל-800","חצי שנה של עבודה שוטפת ותוצאות ראשונות","לקוח שצלח את תקופת ההטמעה (6 ח') ונשאר"],
+  A:["העלאת רווח/הכנסות רבעוני ב-25%+ (כמו Pitbender: 700K→1.6M)","הפחתת עלות מימון ב-50-60% באיחוד הלוואות","שיפור תזרים מדיד ומאומת בפלאסטו","חיסכון עשרות אלפי ₪ בתמחור מחדש של מוצר","סגירת פער גבייה שהחזיר מזומן לעסק","בניית תקציב שהפך הפסד לרווח תוך רבעון","זיהוי ספק יקר והחלפתו - שיפור שוליים ישיר"],
+  A_p90:["ציון הבריאות הפיננסי של הלקוח חצה 90","קפיצה מ-74 ל-91 תוך רבעון","לקוח שהגיע ל'ירוק' בכל מדדי הדופק הפיננסי"],
+  G_newclient:["בעל עסק שהבאת מהרשת שלך ונסגר לריטיינר","לקוח שיזמת בעצמך - לא מהשיווק של הורייזן","המלצת חבר שהפכת לפגישת עבודה שנסגרה","יזם שפגשת באירוע/כנס והכנסת לשירות"],
+  G_upgrade:["לקוח שעבר מכסף (4,200) לפלטינה/טופ (9,200/12,800)","הרחבת היקף הריטיינר של לקוח קיים","לקוח שהוסיף חטיבה/שירות לחבילה","שדרוג בעקבות צמיחת העסק שליווית"],
+  G_partner:["חיבור לגורם שהפך למקור לידים להורייזן","שותפות עם ספק/מפיץ שהבשילה","רו\"ח/יועץ שמפנה אליך לקוחות דרך קבע"],
+  G_recruit:["הפנית מנהל כספים שנקלט לעבודה בהורייזן","קולגה שהבאת והצטרף לצוות","בוגר קורס/מכר מקצועי שגייסת לחברה"],
+  G_book20:["הגעת ל-20 תיקי כספים פעילים בניהול אישי","עברת מ-19 ל-20 לקוחות בטיפול שוטף"],
+  G_book25:["הגעת ל-25 תיקי כספים פעילים בניהול אישי","עברת מ-24 ל-25 לקוחות - ספר מלא"],
+  B_case:["קייס וואו של איחוד הלוואות ליבואן עם מספרים","לקוח שהסכים להצטלם/להתראיין כסיפור הצלחה פומבי","טרנספורמציה של קמעונאי מתועדת בפלאסטו","לקוח שהפך לשגריר מותג שמספר עליך ברשת"],
+  B_ref:["לקוח מרוצה שהפנה בעל עסק שנסגר לריטיינר","הפניה מלקוח קיים שהומרה למשלם","לקוח ששלח אליך חבר בזכות התוצאות"],
+  B_rev:["ביקורת 5★ בגוגל מלקוח מרוצה","המלצה מצולמת קצרה לרשתות","טסטימוניאל כתוב לאתר/דף נחיתה"],
+  S_training:["העברת הדרכה מקצועית לצוות המחלקה","שיתוף כלי/תבנית שהעלתה את כל הצוות","מנטורינג צמוד למנהל כספים חדש"],
+  C_cross:["הפניה לחטיבת האשראי שהבשילה","חיבור לקוח למועדוני לקוחות / טכנולוגיה","הפניה לאקדמיה / נוער עשיר"],
+  D_nps:["לקוח שנתן NPS 9-10","השלמת מודל אופק 360 מלא ללקוח","סקר שביעות רצון שחזר עם ציון מצוין"]
+};
+function tShort(t){const p=(t.label||"").split(" · ");return (p.length>1?p[1]:p[0]).split(" (")[0];}
+function exOf(t){return (EXBANK[t.k]&&EXBANK[t.k].length?EXBANK[t.k]:(t.ex||[]));}
+let exIdx=0;
+function renderExCard(){const t=TRIGGERS.find(x=>x.k==($("#lgType")&&$("#lgType").value));if(!t)return;const bank=exOf(t);if(!bank.length){$("#exCard")&&($("#exCard").style.display="none");return;}const el=$("#exCard");if(!el)return;el.style.display="block";const ex=bank[exIdx%bank.length];el.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-weight:900;font-size:13px">💡 השראה - מה נחשב ${tShort(t)}?</span><span class="muted" style="font-size:11.5px;margin-inline-start:auto">${(exIdx%bank.length)+1}/${bank.length}</span></div><div style="font-size:14px;color:var(--ink2);line-height:1.6">${esc(ex)}</div><button type="button" onclick="nextEx()" style="margin-top:8px;background:#eef2f8;border:1px solid var(--line,#d5deea);border-radius:9px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;color:var(--ink,#22405a)">עוד רעיון ←</button>`;}
+function nextEx(){exIdx++;renderExCard();}
 const $=s=>document.querySelector(s);
 function load(){for(const k of ["ascend5","ascend5_bak","ascend5_prev"]){try{const s=localStorage.getItem(k);if(s&&s.length>20){const o=JSON.parse(s);if(o&&(o.users||o.logs))return o;}}catch(e){}}return{};}
 function save(){const cur=load();if(cur.seq&&cur.seq>state.seq)state.seq=cur.seq;
@@ -466,7 +490,18 @@ function renderLogin(){$("#nav").style.display="none";$("#app").style.display="n
 function enter(u){if(u.admin){pendingAdmin=u;showPin();return;}doEnter(u);}
 function doEnter(u){state.me=u;$("#login").style.display="none";$("#nav").style.display="flex";$("#app").style.display="block";
   $("#waAv").style.background=u.color;$("#waAv").textContent=initials(u.name);$("#waNm").textContent=u.name;save();switchView("dash");
-  if(!state.introShown&&!u.admin&&!u.coach){state.introShown=1;setTimeout(()=>{if(state.me&&!$("#modal").classList.contains("show"))maybeTempt();},1600);}}
+  if(!u.admin&&!u.coach){setTimeout(()=>{if(!state.me||$("#modal").classList.contains("show"))return;if(!localStorage.getItem("introSeen_"+u.id)){localStorage.setItem("introSeen_"+u.id,"1");maybeTempt();}else{maybeNudge();}},1500);}}
+function maybeNudge(){const u=state.me;if(!u||u.admin||u.coach)return;const today=new Date().toISOString().slice(0,10);if(localStorage.getItem("nudge_"+u.id)===today)return;const n=pickNudge(u);if(!n)return;localStorage.setItem("nudge_"+u.id,today);showNudge(n);}
+function pickNudge(u){const bal=u.balance,career=u.career,nt=nextTier(career);
+  if(nt&&nt.min<99999999){const gap=nt.min-career;if(gap>0&&gap<=2500)return{ic:"🚀",t:"כמעט בדרגה הבאה!",b:`עוד <b>${nf(gap)} נק'</b> ואתה ב${nt.n} - מכפיל ×${nt.mult} על כל הישג. ההישג הבא שלך שם.`};}
+  const pz=PRIZES.filter(p=>p.p>bal&&tierIdx(career)>=p.minTier).sort((a,b)=>a.p-b.p)[0];
+  if(pz){const gap=pz.p-bal;if(gap>0&&gap<=2500)return{ic:"🎁",t:"פרס במרחק נגיעה",b:`עוד <b>${nf(gap)} נק'</b> ל${esc(pz.n)} (≈ ₪${nf(ils(pz.p))}). שווה לתעד עוד הישג היום.`};}
+  const logs=state.logs[u.id]||[];const last=logs.length?Math.max(...logs.map(l=>l.ts||0)):0;const days=last?Math.floor((Date.now()-last)/86400000):999;
+  if(days>=7)return{ic:"⏰",t:"מזמן לא תיעדת",b:`${days>=900?"עוד לא תיעדת הישג":"עברו "+days+" ימים מהתיעוד האחרון"}. כל הישג = נקודות שמחכות לך. מה נתת ללקוחות השבוע?`};
+  const a=deptScore("A"),b=deptScore("B"),mine=u.dept==="A"?a:b,other=u.dept==="A"?b:a;
+  if(other>mine&&other-mine>300)return{ic:"🔥",t:"המחלקה השנייה מובילה",b:`מחלקה ${u.dept==="A"?"B":"A"} מובילה ב-<b>${nf(other-mine)} נק'</b>. ההישג הבא שלך יכול להחזיר את היתרון. קדימה.`};
+  return null;}
+function showNudge(n){$("#modalBody").innerHTML=`<div class="mm">${n.ic}</div><h3>${n.t}</h3><div class="sub">${n.b}</div><button class="btn" style="max-width:230px;margin:10px auto 0" onclick="closeModal();switchView('log')">＋ תעד הישג עכשיו</button><button class="skip" onclick="closeModal()">אחר כך</button>`;$("#modal").classList.add("show");}
 function showPin(){$("#modalBody").innerHTML=`<div class="mm">🔒</div><h3>כניסת מנהל</h3>
   <div class="sub">הזן קוד גישה כדי להיכנס לממשק הניהול ולאשר הישגים.</div>
   <input id="pinInput" type="password" inputmode="numeric" maxlength="6" placeholder="קוד" autocomplete="off" style="text-align:center;font-size:22px;letter-spacing:8px;max-width:210px;margin:0 auto" onkeydown="if(event.key==='Enter')checkPin()">
@@ -553,7 +588,7 @@ function renderHistory(u){const logs=state.logs[u.id]||[],total=logs.length;
   const byType=TRIGGERS.map(t=>({t,items:logs.filter(l=>l.type===t.k).slice().reverse()})).filter(x=>x.items.length);
   return `<div class="muted" style="font-size:12.5px;margin-bottom:10px">סה"כ <b>${total}</b> הישגים · ${nf(appr)} נק' מאושרות · ${pend} ממתינים · ${rej} נדחו. <b>לא ניתן למחוק</b> - רק אופק מאשר/דוחה.</div>
     ${byType.map(({t,items})=>{const sum=items.reduce((a,b)=>a+b.pts,0);
-      return `<details class="htype"><summary><span class="sdot" style="background:${t.color}"></span><b>${t.label.split(" · ")[1].split(" (")[0]}</b><span class="cnt">${items.length} הישגים · ${nf(sum)} נק'</span></summary>
+      return `<details class="htype"><summary><span class="sdot" style="background:${t.color}"></span><b>${tShort(t)}</b><span class="cnt">${items.length} הישגים · ${nf(sum)} נק'</span></summary>
         <div class="hlist">${items.map(l=>`<div class="hitem"><div><div class="hc">${esc(l.client||"בלי פרטים")}${l.details?` · ${esc(l.details)}`:""}${l.val?` · ${esc(l.val)} ₪`:""}</div><div class="hd">${fmtDate(l.ts)} · דרגת ${l.tierAt||"-"}</div></div><div class="hr">${stBadge(l.status)}<span class="hp">+${nf(l.pts)}</span></div></div>`).join("")}</div></details>`}).join("")}`;}
 function estCross(u,min){const r=rate(u);if(r<=0||min<=0)return"נקודת הפתיחה";const ago=monthsOf(u)-min/r;if(ago<0)return"בקרוב";const d=new Date();d.setMonth(d.getMonth()-Math.round(ago));return"הושג ~"+MONTHS[d.getMonth()]+" "+d.getFullYear();}
 function renderTierHistory(u){const reached=TIERS.filter(t=>u.career>=t.min&&t.min<99999999);
@@ -627,6 +662,7 @@ function renderLog(){const u=state.me;
   <div class="muted" style="font-size:14px;max-width:640px">בחר סוג, מלא פרטים. ההישג נכנס <b>ממתין לאישור אופק</b> (✓/✗), ואז נספר.</div>
   <div class="card" style="max-width:640px;margin-top:16px">
     <div class="field"><label>סוג ההישג</label><select id="lgType" onchange="lgPreview()">${TRIG_CATS.map(([lbl,keys])=>`<optgroup label="${lbl}">${keys.map(k=>{const t=TRIGGERS.find(x=>x.k===k);return t?`<option value="${t.k}">${t.label.replace(/^[A-Z] · /,"")} · ${nf(t.pts)} נק'</option>`:""}).join("")}</optgroup>`).join("")}</select><div class="hint" id="lgNote"></div></div>
+    <div class="card" id="exCard" style="display:none;margin:2px 0 12px;padding:12px;background:#f5f8fc"></div>
     <div class="field"><label>שם לקוח <span style="color:#d9534f">*</span></label><input id="lgClient" placeholder="למשל: יבואן מזון בע״מ" oninput="$('#lgErr').style.display='none'"></div>
     <div class="field"><label>פרטי ההישג <span style="color:#d9534f">*</span></label><input id="lgDetails" placeholder="מה בדיוק קרה (למשל: איחוד הלוואות, -55% במימון)" oninput="$('#lgErr').style.display='none'"></div>
     <div class="field"><label>ערך משוער (₪) <span class="muted">- אופציונלי</span></label><input id="lgVal" placeholder="למשל 214,000" inputmode="numeric"></div>
@@ -635,15 +671,15 @@ function renderLog(){const u=state.me;
     <button class="btn" onclick="submitLog()">＋ שלח לאישור</button>
     <div class="hint">אתה מעדכן רק את עצמך. עמלות, וותק ודירוג הליגה מתעדכנים אוטומטית.</div></div>
   <div class="sec"><div class="card"><div style="font-weight:900;margin-bottom:10px">💡 דוגמאות - מה נחשב לכל סוג הישג</div>
-    ${TRIGGERS.map(t=>`<div style="margin-bottom:11px;border-bottom:1px solid var(--line);padding-bottom:9px"><b style="color:${t.color}">${t.label.split(" · ")[1]}</b> <span class="pill">${nf(t.pts)} נק'</span><ul style="margin:5px 20px 0;color:var(--ink2);font-size:13px;line-height:1.7">${(t.ex||[]).map(e=>`<li>${e}</li>`).join("")}</ul></div>`).join("")}
+    ${TRIGGERS.map(t=>`<div style="margin-bottom:11px;border-bottom:1px solid var(--line);padding-bottom:9px"><b style="color:${t.color}">${tShort(t)}</b> <span class="pill">${nf(t.pts)} נק'${t.cash?` · +${nf(t.cash)}₪`:""}</span><ul style="margin:5px 20px 0;color:var(--ink2);font-size:13px;line-height:1.7">${exOf(t).map(e=>`<li>${esc(e)}</li>`).join("")}</ul></div>`).join("")}
     <div class="muted" style="font-size:12px">כל הישג עובר אישור לפני שהנקודות נכנסות לארנק. תוצאה ללקוח (A) שווה הכי הרבה - זה הלב.</div>
   </div></div></div>`;lgPreview();}
 function lgPreview(){const u=state.me,t=TRIGGERS.find(x=>x.k==$("#lgType").value),m=t.vvs?tierOf(u.career).mult:1,g=Math.round(t.pts*m);
-  $("#lgPts").textContent="+"+nf(g)+" נק'"+(t.vvs?` (כולל מכפיל דרגה ×${m}) · עולה בליגה`:" · ארנק בלבד");$("#lgNote").textContent=t.note+(t.ex&&t.ex[0]?" · לדוגמה: "+t.ex[0]:"");}
+  $("#lgPts").textContent="+"+nf(g)+" נק'"+(t.cash?" + "+nf(t.cash)+"₪":"")+(t.vvs?` (כולל מכפיל דרגה ×${m}) · עולה בליגה`:" · ארנק בלבד");$("#lgNote").textContent=t.note;exIdx=0;renderExCard();}
 function submitLog(){const u=state.me;if(!u||u.admin||u.coach)return;const t=TRIGGERS.find(x=>x.k==$("#lgType").value),client=$("#lgClient").value.trim(),details=$("#lgDetails").value.trim(),val=$("#lgVal").value.trim(),m=t.vvs?tierOf(u.career).mult:1,g=Math.round(t.pts*m);
   if(!client||!details){$("#lgErr").style.display="block";return;}
   const aR=t.k==="B_ref"?1:0,aS=(t.k==="A"||t.k==="A_p90"||t.k==="B_case")?1:0,aStars=t.k==="B_case"?1:0;
-  (state.logs[u.id]=state.logs[u.id]||[]).push({id:++state.seq,type:t.k,short:t.label.split(" · ")[0]+" · "+t.label.split(" · ")[1].split(" (")[0],pts:g,vvs:t.vvs,client,details,val,color:t.color,status:"pending",ts:Date.now(),tierAt:userTier(u).n,addedRefs:aR,addedStreak:aS,addedStars:aStars});
+  (state.logs[u.id]=state.logs[u.id]||[]).push({id:++state.seq,type:t.k,short:t.label.split(" (")[0],pts:g,vvs:t.vvs,client,details,val,color:t.color,status:"pending",ts:Date.now(),tierAt:userTier(u).n,addedRefs:aR,addedStreak:aS,addedStars:aStars});
   save();/* כלום לא נספר עד אישור - לא ארנק ולא VVS/דרגה/תחרות. מוצג כ"ממתין". */
   celebrate(t.k==="B_case"?"⭐ נשלח לאישור - כוכב בדרך!":t.k==="B_ref"?"🌱 הפניה נשלחה לאישור":"🔥 נשלח לאישור · +"+nf(g)+" נק' (ממתין)");switchView("dash");}
 
