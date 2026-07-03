@@ -7,7 +7,7 @@
 - אופק:   https://horizongrouptech-tech.github.io/pisga/?u=ofek
 - אלירן:  https://horizongrouptech-tech.github.io/pisga/?u=eliran
 
-## מנהלי מחלקה
+## מנהלי מחלקה - PIN 1244
 - יוראי:  https://horizongrouptech-tech.github.io/pisga/?u=yorai
 - עומר:   https://horizongrouptech-tech.github.io/pisga/?u=omer
 

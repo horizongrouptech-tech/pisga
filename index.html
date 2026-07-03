@@ -399,7 +399,7 @@ const TRIGGERS=[
 const MONTHS=["ינו","פבר","מרץ","אפר","מאי","יונ","יול","אוג","ספט","אוק","נוב","דצמ"];
 
 const state={me:null,logs:{},redemp:{},seq:0};
-const ADMIN_PIN="124456";let pendingAdmin=null;
+const ADMIN_PIN="124456";const COACH_PIN="1244";let pendingAdmin=null;
 const OVERRIDE=0.15;/* מנהל מחלקה צובר 15% מכל הישג מאושר של הצוות שלו - מנצח כשהצוות מנצח */
 const PT_ILS=0.17;/* שווי פרס מוצג למנהל (מנופח מעט מעל מחיר השוק - התלהבות + תפיסת ערך; העלות בפועל לחברה נמוכה יותר) */
 const CASH_KEEP=0.65;/* המרה לכסף במקום פרס = 65% מהשווי (ניכוי 35%) - עוגן פסיכולוגי, עדיף פרס */
@@ -510,7 +510,7 @@ function showPin(){$("#modalBody").innerHTML=`<div class="mm">🔒</div><h3>כנ
   <button class="skip" onclick="pendingAdmin=null;closeModal();renderLogin()">ביטול</button>`;
   $("#modal").classList.add("show");setTimeout(()=>{const i=$("#pinInput");if(i)i.focus();},120);}
 function adminGate(){pendingAdmin="__pick__";showPin();}
-function checkPin(){const v=($("#pinInput").value||"").trim();if(v===ADMIN_PIN){if(pendingAdmin==="__pick__"){adminPick();}else{const u=pendingAdmin;pendingAdmin=null;closeModal();doEnter(u);}}else{$("#pinErr").textContent="קוד שגוי, נסה שוב";$("#pinInput").value="";$("#pinInput").focus();}}
+function checkPin(){const v=($("#pinInput").value||"").trim();const need=(pendingAdmin&&pendingAdmin!=="__pick__"&&pendingAdmin.coach&&!pendingAdmin.admin)?COACH_PIN:ADMIN_PIN;if(v===need){if(pendingAdmin==="__pick__"){adminPick();}else{const u=pendingAdmin;pendingAdmin=null;closeModal();doEnter(u);}}else{$("#pinErr").textContent="קוד שגוי, נסה שוב";$("#pinInput").value="";$("#pinInput").focus();}}
 function adminPick(){pendingAdmin=null;const admins=USERS.filter(u=>u.admin);$("#modalBody").innerHTML=`<div class="mm">👑</div><h3>מי נכנס לניהול?</h3><div class="sub">בחר את עצמך כדי להיכנס לאישורים.</div><div style="display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap">${admins.map(a=>`<div class="ucard" style="cursor:pointer;min-width:120px;margin:0" onclick="closeModal();doEnter(USERS.find(x=>x.id==='${a.id}'))"><div class="av" style="background:${a.color}">${esc(initials(a.name))}</div><div class="nm">${esc(a.name)}</div><div class="role">👑 אדמין</div></div>`).join("")}</div><button class="skip" style="margin-top:14px" onclick="closeModal();renderLogin()">ביטול</button>`;}
 function logout(){state.me=null;save();renderLogin();}
 function askLogout(){if(confirm("לצאת מהחשבון של "+(state.me?state.me.name:"")+" ולחזור למסך הבחירה?"))logout();}
