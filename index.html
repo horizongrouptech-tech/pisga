@@ -379,14 +379,16 @@ const PRIZES=[
   {n:"השתתפות מימון רכב / טיול גדול",p:160000,minTier:3,band:"הילה · ~4-5 שנה",cls:"halo",ic:"car",img:IMG+"1503376780353-7e6692767b70"+Q}
 ];
 const TRIGGERS=[
-  {k:"A",label:"A · תוצאה מדידה ללקוח",pts:500,color:"#d9a531",vvs:true,note:"הלב של המודל - תוצאה מדידה ללקוח. מהתגמול הגבוה (צמיחה/לקוח חדש מזכה בשיא). מוכפל בדרגה.",ex:["העלאת רווח/הכנסות רבעוני ב-25%+ (כמו Pitbender: 700K→1.6M)","הפחתת עלות מימון ב-50-60% בזכות איחוד הלוואות","שיפור תזרים מדיד ומאומת בפלאסטו"]},
-  {k:"G_newclient",label:"G · לקוח חדש שהבאת בעצמך (מחוץ להורייזן)",pts:700,color:"#25b877",vvs:true,note:"ערך שיא - הבאת עסק חדש מהיוזמה/הרשת שלך, לא מליד שיווקי. הכנסה חדשה לחברה. מוכפל בדרגה.",ex:["בעל עסק שהבאת מהרשת שלך ונסגר לריטיינר","לקוח חדש שיזמת בעצמך - לא הגיע מהשיווק של הורייזן"]},
+  {k:"R_year",label:"🏅 שנה מלאה עם לקוח (שימור)",pts:800,color:"#c9862a",vvs:true,note:"התגמול הגבוה ביותר. שנה של שימור = ההוכחה הכי חזקה לערך שלך, והכי שווה לחברה (ריטיינר חוזר). מדווחים כל שנה מחדש לכל לקוח - השאיפה שכל לקוח יצבור שנה ועוד שנה. מוכפל בדרגה.",ex:["לקוח שהשלים 12 חודשי ריטיינר רצופים בניהולך","חידוש לשנה שנייה/שלישית - כל שנה מזכה מחדש"]},
+  {k:"R_half",label:"🕐 חצי שנה עם לקוח (שימור)",pts:200,color:"#c9862a",vvs:true,note:"תחנת ביניים בדרך לשנה - הרבה פחות מהשנה המלאה (800), אבל שני צ'ק-פוינטים בכל שנת לקוח שומרים על המומנטום. מוכפל בדרגה.",ex:["לקוח שהשלים 6 חודשי ריטיינר רצופים","אמצע השנה של הלקוח - עוד תחנה לפני ה-800"]},
+  {k:"A",label:"A · תוצאה מדידה ללקוח",pts:500,color:"#d9a531",vvs:true,note:"הלב של המודל - תוצאה מדידה ללקוח. מהתגמול הגבוה (שנה-עם-לקוח וצמיחה מזכים בשיא). מוכפל בדרגה.",ex:["העלאת רווח/הכנסות רבעוני ב-25%+ (כמו Pitbender: 700K→1.6M)","הפחתת עלות מימון ב-50-60% בזכות איחוד הלוואות","שיפור תזרים מדיד ומאומת בפלאסטו"]},
+  {k:"G_newclient",label:"G · לקוח חדש שהבאת בעצמך (מחוץ להורייזן)",pts:700,color:"#25b877",vvs:true,cash:500,cashto:"מנהל הכספים",note:"ערך שיא - הבאת עסק חדש מהיוזמה/הרשת שלך, לא מליד שיווקי. 💵 בונוס 500 ₪ מזומן בכניסת הלקוח לשירות - מעבר לנקודות ולעמלת השירות. מוכפל בדרגה.",ex:["בעל עסק שהבאת מהרשת שלך ונסגר לריטיינר","לקוח חדש שיזמת בעצמך - לא הגיע מהשיווק של הורייזן"]},
   {k:"G_partner",label:"G · שותפות עסקית מעניינת שהבשלת להורייזן",pts:600,color:"#25b877",vvs:true,note:"פיתוח עסקי - חיבור/שותפות אסטרטגית שהבשלת (ספק, מפיץ, מקור deal-flow). מוכפל בדרגה.",ex:["חיבור לגורם שהפך לשותף / מקור לידים להורייזן","שיתוף פעולה שהבשיל למערכת יחסים עסקית"]},
   {k:"G_book20",label:"G · חצית 20 לקוחות בניהול אישי",pts:350,color:"#25b877",vvs:true,note:"אבן דרך - ספר הלקוחות מתמלא. המדרגה הראשונה בדרך ל-25. פעם אחת בחציית הרף. מוכפל בדרגה.",ex:["הגעת ל-20 תיקי כספים פעילים בניהול אישי","עברת מ-19 ל-20 לקוחות בטיפול שוטף"]},
   {k:"G_book25",label:"G · חצית 25 לקוחות בניהול אישי",pts:700,color:"#25b877",vvs:true,note:"אבן דרך ענקית - ספר לקוחות מלא ובוגר בניהולך. מהתגמול הגבוה ביותר. פעם אחת בחציית הרף. מוכפל בדרגה.",ex:["הגעת ל-25 תיקי כספים פעילים בניהול אישי","עברת מ-24 ל-25 לקוחות בטיפול שוטף"]},
   {k:"A_p90",label:"A · לקוח עבר ציון 90 בפלאסטו",pts:500,color:"#d9a531",vvs:true,note:"בריאות פיננסית מעולה - רק ציון 90+ מקנה נקודות.",ex:["ציון הבריאות הפיננסי של הלקוח חצה 90","קפיצה מ-74 ל-91 תוך רבעון"]},
-  {k:"B_case",label:"B · קייס סטאדי / כוכב Horizon",pts:350,color:"#2299b3",vvs:true,note:"נכס מותג - מזכה בכוכב. נשען על תוצאה מאומתת. מוכפל בדרגה.",ex:["קייס וואו של איחוד הלוואות ליבואן","טרנספורמציה של קמעונאי עם מספרים מאומתים בפלאסטו"]},
-  {k:"B_ref",label:"B · הפניה שהומרה (פה-לאוזן)",pts:300,color:"#2299b3",vvs:true,note:"הלקוח החדש נכנס לתיק שלך = התיק גדל + נקודות.",ex:["לקוח מרוצה הפנה בעל עסק שנסגר לריטיינר מלא","הפניה מלקוח קיים שהומרה ללקוח משלם"]},
+  {k:"B_case",label:"B · קייס סטאדי / כוכב Horizon",pts:350,color:"#2299b3",vvs:true,note:"נכס מותג. קייס סטאדי = תוצאת לקוח מתועדת עם מספרים מאומתים. ⭐ כוכב Horizon = כשהלקוח הופך לנכס מותג פומבי: מסכים להצטלם/להופיע בשמו כסיפור הצלחה שהורייזן מפרסמת (המלצה מצולמת, קייס בכתבה/רשת) - זה מה שמגדיל את השם של הורייזן החוצה. מוכפל בדרגה.",ex:["קייס וואו של איחוד הלוואות ליבואן עם מספרים מאומתים","לקוח שהסכים להצטלם/להתראיין כסיפור הצלחה פומבי של הורייזן"]},
+  {k:"B_ref",label:"B · הפניה שהומרה (פה-לאוזן)",pts:300,color:"#2299b3",vvs:true,cash:1000,cashto:"מנהל המחלקה (לשיקולו)",note:"הלקוח החדש נכנס לתיק שלך = התיק גדל + נקודות. 💵 בונוס 1,000 ₪ למנהל המחלקה - לחלוקה או לא עם מנהל הכספים, לפי מידת האקטיביות שלו בהבאת ההפניה.",ex:["לקוח מרוצה הפנה בעל עסק שנסגר לריטיינר מלא","הפניה מלקוח קיים שהומרה ללקוח משלם"]},
   {k:"B_rev",label:"B · ביקורת גוגל 5★ / המלצה מצולמת",pts:150,color:"#2299b3",vvs:true,note:"מלקוח בריא, הבקשה יוצאת ממערכת Horizon.",ex:["ביקורת 5 כוכבים בגוגל ביוזמת הלקוח","סרטון המלצה מלקוח מרוצה"]},
   {k:"S_training",label:"S · הדרכה/העשרה לצוות לשיפור מנהלי הכספים",pts:300,color:"#9a6ff0",vvs:false,note:"תרומה לצוות - יזמת והעברת הדרכה שמעלה את רמת מנהלי הכספים. כסף בארנק + הכרה.",ex:["העברת סדנה/הדרכה מקצועית לצוות","בניית מדריך/תהליך שמשפר את כל המחלקה"]},
   {k:"C_cross",label:"C · הפניה לחטיבה (אשראי/מועדון/טק/אקדמיה נוער עשיר)",pts:200,color:"#5b83f0",vvs:false,note:"קרוס-סייל - כסף בארנק (לא מזיז בליגה).",ex:["הלקוח יצא לגיוס אשראי דרך הורייזן","הלקוח הצטרף למועדון לקוחות / אקדמיה / טכנולוגיה"]},
@@ -396,9 +398,30 @@ const MONTHS=["ינו","פבר","מרץ","אפר","מאי","יונ","יול","א
 
 const state={me:null,logs:{},redemp:{},seq:0};
 const ADMIN_PIN="124456";let pendingAdmin=null;
+const OVERRIDE=0.15;/* מנהל מחלקה צובר 15% מכל הישג מאושר של הצוות שלו - מנצח כשהצוות מנצח */
+const PT_ILS=0.14;/* שווי משוער לנקודה בפרסים (מבוסס מחירי שוק בישראל 2026: אייפון 16 ~3,989₪=28k נק') */
+const CASH_KEEP=0.65;/* המרה לכסף במקום פרס = 65% מהשווי (ניכוי 35%) - עוגן פסיכולוגי, עדיף פרס */
+function ils(pts){return Math.round(pts*PT_ILS);}
+const COACH_TRIGGERS=[
+  {k:"D_win",label:"🏆 המחלקה ניצחה את השנייה (רבעון)",pts:1000,note:"בונוס ניהולי - המחלקה שלך הובילה ברבעון. מדווח בסוף רבעון מנצח."},
+  {k:"D50",label:"📈 המחלקה חצתה 50 לקוחות",pts:1500,note:"אבן דרך מחלקתית - ספר של 50 תיקים. חד-פעמי."},
+  {k:"D75",label:"📈 המחלקה חצתה 75 לקוחות",pts:2500,note:"3 מנהלים חזקים - 75 תיקים במחלקה. חד-פעמי."},
+  {k:"D100",label:"🚀 המחלקה חצתה 100 לקוחות",pts:4000,note:"הפסגה הניהולית - 4 מנהלי כספים, 100 תיקים. חד-פעמי."}
+];
+const TRIG_CATS=[
+  ["שימור לקוח (הכי שווה)",["R_year","R_half"]],
+  ["תוצאה ללקוח - הלב",["A","A_p90"]],
+  ["צמיחה והבאת ערך",["G_newclient","G_partner","G_book20","G_book25"]],
+  ["מותג והפניות",["B_case","B_ref","B_rev"]],
+  ["צוות וקרוס-סייל",["S_training","C_cross","D_nps"]]
+];
 const $=s=>document.querySelector(s);
-function load(){try{return JSON.parse(localStorage.getItem("ascend5")||"{}")}catch(e){return{}}}
-function save(){const cur=load();if(cur.seq&&cur.seq>state.seq)state.seq=cur.seq;localStorage.setItem("ascend5",JSON.stringify({users:USERS,logs:state.logs,redemp:state.redemp,seq:state.seq,me:state.me&&state.me.id}))}
+function load(){for(const k of ["ascend5","ascend5_bak","ascend5_prev"]){try{const s=localStorage.getItem(k);if(s&&s.length>20){const o=JSON.parse(s);if(o&&(o.users||o.logs))return o;}}catch(e){}}return{};}
+function save(){const cur=load();if(cur.seq&&cur.seq>state.seq)state.seq=cur.seq;
+  const blob=JSON.stringify({users:USERS,logs:state.logs,redemp:state.redemp,seq:state.seq,me:state.me&&state.me.id,savedAt:Date.now()});
+  try{const prev=localStorage.getItem("ascend5");if(prev&&prev.length>20)localStorage.setItem("ascend5_prev",prev);localStorage.setItem("ascend5",blob);localStorage.setItem("ascend5_bak",blob);}catch(e){}}
+function exportData(){const blob=localStorage.getItem("ascend5")||"{}";const a=document.createElement("a");a.href="data:application/json;charset=utf-8,"+encodeURIComponent(blob);a.download="pisga-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();}
+function importData(ev){const f=ev.target.files&&ev.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);if(!o||!o.users)throw 0;if(!confirm("לשחזר את הגיבוי? הפעולה תדרוס את הנתונים במכשיר הזה."))return;localStorage.setItem("ascend5",rd.result);localStorage.setItem("ascend5_bak",rd.result);location.reload();}catch(e){alert("קובץ גיבוי לא תקין.");}};rd.readAsText(f);}
 function uid4(){try{return crypto.randomUUID()}catch(e){return"r"+Date.now().toString(36)+Math.round(performance.now()).toString(36)}}
 function syncFromStorage(u){const cur=load();if(!cur||!cur.users)return;const fu=cur.users.find(x=>x.id===u.id);if(fu&&typeof fu.balance==="number")u.balance=fu.balance;if(cur.redemp)state.redemp=cur.redemp;if(cur.logs)state.logs=cur.logs;if(cur.seq&&cur.seq>state.seq)state.seq=cur.seq;}
 function initials(n){return n.trim().split(" ")[0].slice(0,2)}
@@ -536,10 +559,17 @@ function renderTierHistory(u){const reached=TIERS.filter(t=>u.career>=t.min&&t.m
     return `<div class="throw ${t.metal}${cur?' cur':''}"><div class="ti">${t.ico}</div><div class="tinfo"><div><b>${t.n}</b>${cur?' <span class="hereb">📍 אתה כאן</span>':''} <span style="font-size:11.5px;opacity:.8">· ${estCross(u,t.min)}</span></div><div class="tw">נצבר בדרגה: <b>${nf(band)} VVS</b>${cur?" (עדיין מתמלא)":""}${t.mult?" · כל הישג הוכפל ×"+t.mult:""}</div></div></div>`}).join("")+
     `<div class="muted" style="font-size:11.5px;margin-top:8px">ה-VVS בכל דרגה מגיע מהישגי ערך מאומתים (A תוצאה ללקוח + B מותג/הפניה). ככל שהדרגה גבוהה יותר - כל הישג שווה יותר נקודות (מכפיל גבוה).</div>`;}
 
-function pendingList(){const out=[];USERS.forEach(u=>{if(u.admin||u.coach)return;(state.logs[u.id]||[]).forEach(l=>{if(l.status==="pending")out.push({u,l})})});return out;}
+function pendingList(){const out=[];USERS.forEach(u=>{if(u.admin)return;(state.logs[u.id]||[]).forEach(l=>{if(l.status==="pending")out.push({u,l})})});return out;}
+function submitCoachLog(){const u=state.me;if(!u||!u.coach)return;const t=COACH_TRIGGERS.find(x=>x.k===$("#clType").value);if(!t)return;const details=($("#clDetails").value||"").trim();if(!details){$("#clErr").style.display="block";return;}
+  (state.logs[u.id]=state.logs[u.id]||[]).push({id:++state.seq,type:t.k,short:t.label,pts:t.pts,vvs:true,client:"מחלקה "+u.dept,details,val:"",color:"#c9862a",status:"pending",ts:Date.now(),tierAt:"מעגל פנימי",addedRefs:0,addedStreak:0,addedStars:0,coachLog:1});
+  save();celebrate("🔥 נשלח לאישור אופק · +"+nf(t.pts)+" נק' (ממתין)");renderCoach();}
 function renderAdmin(){const players=USERS.filter(u=>!u.admin),pend=pendingList(),rq=redempList();
   $("#v-dash").innerHTML=`<div class="sec"><div class="kick">מסך אדמין - אופק</div><h1>אישורים ומבט-על</h1>
   <div class="note">כל אחד יכול להיכנס ולתעד - אבל <b>כל הישג עובר אליך לאישור</b>. סמן ✓ (מאשר, ננעל) או ✗ (דוחה, הנקודות מוסרות). ככה אף אחד לא מזין שטויות ולא מעדכן עבור אחר.</div>
+  <div class="card" style="margin-top:12px"><div style="font-weight:900;margin-bottom:4px">🛟 גיבוי נתונים</div>
+    <div class="muted" style="font-size:12.5px;margin-bottom:8px">הנתונים נשמרים אוטומטית + גיבוי כפול במכשיר. <b>מומלץ להוריד גיבוי קובץ מדי פעם</b> - כדי שלעולם לא נאבד נקודות. (הגיבוי במכשיר בלבד; לסנכרון בין מכשירים נצטרך שרת - ראה הודעה.)</div>
+    <button class="btn" style="max-width:220px;background:#25b877" onclick="exportData()">📥 הורד גיבוי עכשיו</button>
+    <label class="btn" style="max-width:220px;background:#8595ad;display:inline-block;text-align:center;cursor:pointer">📤 שחזר מגיבוי<input type="file" accept="application/json,.json" onchange="importData(event)" style="display:none"></label></div>
   <div class="sec"><div class="kick">תור אישורים ${pend.length?`(${pend.length})`:""}</div>
     ${pend.length?`<div class="appr">${pend.map(({u,l})=>`<div class="row"><span class="av" style="background:${u.color}">${esc(initials(u.name))}</span>
       <div class="info"><b>${esc(u.name)}</b> · ${l.short}<div class="d">${esc(l.client||"בלי פרטים")}${l.details?" · "+esc(l.details):""}${l.val?" · "+esc(l.val)+" ₪":""}</div></div>
@@ -558,7 +588,9 @@ function renderAdmin(){const players=USERS.filter(u=>!u.admin),pend=pendingList(
 function refreshApprovals(){if(state.me&&state.me.admin)renderAdmin();else if(state.me&&state.me.coach)renderCoach();}
 function canApprove(u){return !!(state.me&&u&&state.me.id!==u.id&&(state.me.admin||(state.me.coach&&state.me.dept===u.dept&&!u.coach)));}
 function approveLog(uid,id){const u=USERS.find(x=>x.id===uid),l=(state.logs[uid]||[]).find(x=>x.id===id);if(!u||!l||l.status!=="pending"||!canApprove(u))return;
-  l.status="approved";u.balance+=l.pts;if(l.vvs)u.career+=l.pts;u.refs+=(l.addedRefs||0);u.streak+=(l.addedStreak||0);u.stars+=(l.addedStars||0);save();celebrate("✓ אושר · "+nf(l.pts)+" נק' נכנסו לארנק");refreshApprovals();}
+  l.status="approved";u.balance+=l.pts;if(l.vvs)u.career+=l.pts;u.refs+=(l.addedRefs||0);u.streak+=(l.addedStreak||0);u.stars+=(l.addedStars||0);
+  if(!u.coach&&!u.admin){const co=USERS.find(x=>x.coach&&!x.admin&&x.dept===u.dept);if(co){const ov=Math.round(l.pts*OVERRIDE);co.balance+=ov;co.career+=ov;co.overrideEarned=(co.overrideEarned||0)+ov;}}
+  save();celebrate("✓ אושר · "+nf(l.pts)+" נק' נכנסו לארנק");refreshApprovals();}
 function rejectLog(uid,id){const u=USERS.find(x=>x.id===uid),l=(state.logs[uid]||[]).find(x=>x.id===id);if(!u||!l||l.status!=="pending"||!canApprove(u))return;
   l.status="rejected";save();refreshApprovals();/* כלום לא נכנס לפני אישור - אין מה לקזז */}
 function teamPending(dep){const out=[];USERS.forEach(u=>{if(u.admin||u.coach||u.dept!==dep)return;(state.logs[u.id]||[]).forEach(l=>{if(l.status==="pending")out.push({u,l})})});return out;}
@@ -571,6 +603,19 @@ function renderCoach(){const c=state.me,tp=teamPending(c.dept),team=USERS.filter
       <span class="pts">+${nf(l.pts)}</span><div class="acts"><button class="ok" title="אשר" onclick="approveLog('${u.id}',${l.id})">✓</button><button class="no" title="דחה" onclick="rejectLog('${u.id}',${l.id})">✗</button></div></div>`).join("")}</div>`
     :`<div class="card"><div class="muted">אין הישגים שממתינים לאישור בצוות שלך. 👌</div></div>`}
   </div>
+  <div class="sec"><div class="kick">מה אני מרוויח - מנהל מחלקה 👑</div>
+  <div class="grid g2">
+    <div class="card"><div style="font-weight:900;margin-bottom:4px">הארנק שלי</div>
+      <div style="font-size:34px;font-weight:900">${nf(c.balance)} <span style="font-size:14px;color:var(--muted)">נק'</span></div>
+      <div class="muted" style="font-size:13px;margin-top:4px">מתוכן <b style="color:var(--ink)">${nf(c.overrideEarned||0)}</b> נק' אוברררייד - <b>15%</b> מכל הישג מאושר של הצוות שלך. אתה מנצח כשהם מנצחים.</div>
+      <div class="note" style="margin-top:12px;font-size:12.5px">כל נקודה של כל אחד מ-${team.length} אנשי הצוות = 15% אליך. זה מצטבר לטיסות ולפרסים הגדולים. <button class="btn" style="margin-top:8px" onclick="switchView('prizes')">לקטלוג הפרסים ←</button></div></div>
+    <div class="card"><div style="font-weight:900;margin-bottom:4px">תעד הישג ניהולי</div>
+      <div class="muted" style="font-size:12.5px;margin-bottom:8px">הישגים ברמת המחלקה - נשלחים לאישור אופק.</div>
+      <div class="field"><label>סוג</label><select id="clType">${COACH_TRIGGERS.map(t=>`<option value="${t.k}">${t.label} · ${nf(t.pts)} נק'</option>`).join("")}</select></div>
+      <div class="field"><label>פרטים <span style="color:#d9534f">*</span></label><input id="clDetails" placeholder="למשל: רבעון Q3 2026, או המחלקה עברה 50 תיקים" oninput="$('#clErr').style.display='none'"></div>
+      <div id="clErr" style="display:none;color:#d9534f;font-size:13px;font-weight:700;margin:4px 0">חובה למלא פרטים.</div>
+      <button class="btn" onclick="submitCoachLog()">＋ שלח לאישור אופק</button></div>
+  </div></div>
   ${deptVs()}
   <div class="sec"><div class="kick">הצוות שלי</div>${leadTable(team)}</div></div>`;updateWallet();}
 
@@ -579,7 +624,7 @@ function renderLog(){const u=state.me;
   $("#v-log").innerHTML=`<div class="sec"><div class="kick">אתה מתעד - רק את עצמך</div><h1>תעד הישג</h1>
   <div class="muted" style="font-size:14px;max-width:640px">בחר סוג, מלא פרטים. ההישג נכנס <b>ממתין לאישור אופק</b> (✓/✗), ואז נספר.</div>
   <div class="card" style="max-width:640px;margin-top:16px">
-    <div class="field"><label>סוג ההישג</label><select id="lgType" onchange="lgPreview()">${TRIGGERS.map(t=>`<option value="${t.k}">${t.label}</option>`).join("")}</select><div class="hint" id="lgNote"></div></div>
+    <div class="field"><label>סוג ההישג</label><select id="lgType" onchange="lgPreview()">${TRIG_CATS.map(([lbl,keys])=>`<optgroup label="${lbl}">${keys.map(k=>{const t=TRIGGERS.find(x=>x.k===k);return t?`<option value="${t.k}">${t.label.replace(/^[A-Z] · /,"")} · ${nf(t.pts)} נק'</option>`:""}).join("")}</optgroup>`).join("")}</select><div class="hint" id="lgNote"></div></div>
     <div class="field"><label>שם לקוח <span style="color:#d9534f">*</span></label><input id="lgClient" placeholder="למשל: יבואן מזון בע״מ" oninput="$('#lgErr').style.display='none'"></div>
     <div class="field"><label>פרטי ההישג <span style="color:#d9534f">*</span></label><input id="lgDetails" placeholder="מה בדיוק קרה (למשל: איחוד הלוואות, -55% במימון)" oninput="$('#lgErr').style.display='none'"></div>
     <div class="field"><label>ערך משוער (₪) <span class="muted">- אופציונלי</span></label><input id="lgVal" placeholder="למשל 214,000" inputmode="numeric"></div>
@@ -670,21 +715,30 @@ function icon(k){const I={
   beach:'<svg viewBox="0 0 24 24" fill="none"><circle cx="17" cy="7" r="3" fill="#f6b24f"/><path d="M2 20h20" stroke="#2299b3" stroke-width="2"/><path d="M6 20c0-4 3-7 7-7" stroke="#25b877" stroke-width="2"/></svg>',
   car:'<svg viewBox="0 0 24 24" fill="none"><path d="M3 15l2-5h14l2 5v3H3v-3z" fill="#f6894f"/><path d="M6 10l1.5-3h9L18 10" stroke="#2299b3" stroke-width="1.4"/><circle cx="7" cy="18" r="1.8" fill="#3a4358"/><circle cx="17" cy="18" r="1.8" fill="#3a4358"/></svg>',
   coffee:'<svg viewBox="0 0 24 24" fill="none"><path d="M4 8h12v6a4 4 0 01-4 4H8a4 4 0 01-4-4V8z" fill="#3a4358"/><path d="M16 9h2.5a2.5 2.5 0 010 5H16" stroke="#8b97b5" stroke-width="1.6" fill="none"/><path d="M7 2.5c-.6 1 .6 1.8 0 3M11 2.5c-.6 1 .6 1.8 0 3" stroke="#f6894f" stroke-width="1.4" fill="none"/></svg>'};return I[k]||I.gift;}
-function renderPrizes(){const u=state.me,bal=u.admin?0:u.balance,r=u.admin?0:rate(u),uti=u.admin?4:tierIdx(u.career);
+function renderPrizes(){const u=state.me,bal=u.admin?0:u.balance,r=u.admin?0:rate(u),uti=(u.admin||u.coach)?4:tierIdx(u.career);
   $("#v-prizes").innerHTML=`<div class="sec"><div class="kick">מה אפשר לזכות</div><h1>קטלוג הפרסים</h1>
   <div class="note" style="margin-top:6px;max-width:760px">💡 אפשר לממש פרס קטן כבר עכשיו - אבל <b>שווה הרבה יותר לחכות</b>. כל נקודה שתחסוך מקרבת אותך לפרס הגדול. ככל שעולים בדרגה נפתחים פרסים חדשים.</div>
-  ${u.admin?"":`<div class="muted" style="font-size:14px;margin-top:10px">הארנק שלך: <b style="color:var(--ink)">${nf(bal)}</b> נק' · דרגת ${tierOf(u.career).n}.</div>`}
+  ${u.admin?"":`<div class="muted" style="font-size:14px;margin-top:10px">הארנק שלך: <b style="color:var(--ink)">${nf(bal)}</b> נק' · דרגת ${userTier(u).n}.${u.coach?" (מנהל מחלקה - כל הקטלוג פתוח)":""}</div>
+  <div class="card" style="margin-top:12px"><div style="font-weight:900;margin-bottom:4px">כמה שוות הנקודות שלך? 💰</div>
+    <div class="muted" style="font-size:13px">כל נקודה = בערך <b style="color:var(--ink)">₪${PT_ILS.toFixed(2)}</b> בשווי פרסים (לפי מחירי שוק). היתרה שלך <b>${nf(bal)}</b> נק' ≈ <b style="color:var(--teal)">₪${nf(ils(bal))}</b> בפרסים.</div>
+    <div class="note" style="margin-top:10px;font-size:12.5px">💵 אפשר גם להמיר לכסף במקום פרס - אבל <b>בניכוי 35%</b>: על היתרה תקבל רק <b>₪${nf(Math.round(ils(bal)*CASH_KEEP))}</b> במזומן במקום ₪${nf(ils(bal))} בפרס. <b>הפרס שווה לך הרבה יותר.</b>${bal>0?` <button class="btn" style="margin-top:8px;background:#8595ad;max-width:260px" onclick="cashOut()">המרה לכסף (מפסידים 35%)</button>`:""}</div></div>`}
   <div class="prizes" style="margin-top:16px">${PRIZES.map((pz,pi)=>{const unlocked=uti>=pz.minTier,can=unlocked&&bal>=pz.p,need=pz.p-bal,eta=r>0&&need>0?Math.ceil(need/r):0,prog=Math.min(100,bal/pz.p*100);
     return `<div class="prize ${pz.cls} ${!unlocked?'locked':''}">${pz.cls==="halo"?'<div class="band halo">הילה</div>':''}
       ${!unlocked?`<div class="lockchip">🔒 נפתח ב${TIERS[pz.minTier].n}</div>`:""}
       <div class="ic"><div class="fb">${icon(pz.ic)}</div><img src="${pz.img}" alt="" loading="lazy" onerror="this.style.display='none'"></div>
-      <div class="nm">${pz.n}</div><div class="pts">${nf(pz.p)} <span style="font-size:12px;color:var(--muted)">נק'</span></div><div class="eta">${pz.band}</div>
+      <div class="nm">${pz.n}</div><div class="pts">${nf(pz.p)} <span style="font-size:12px;color:var(--muted)">נק' · ≈ ₪${nf(ils(pz.p))}</span></div><div class="eta">${pz.band}</div>
       ${u.admin?"":`<div class="bar" style="margin-top:8px"><i style="width:${prog}%"></i></div>
       <div class="eta">${!unlocked?`דורש דרגת ${TIERS[pz.minTier].n}`:can?"✅ אפשר לממש - אבל אולי כדאי לחסוך":`עוד ${nf(need)} נק'${eta>0?` · ~${eta} ח'`:""}`}</div>
       <button class="redeem ${can?'can':'cant'}" ${can?`onclick="this.disabled=true;redeem(${pi})"`:"disabled"}>${!unlocked?"נעול":can?"ממש פרס":"עוד לא"}</button>`}
     </div>`}).join("")}</div>
   <div class="note" style="margin-top:16px">💪 כל נקודה שתחסוך מקרבת אותך לפרס הגדול. אפשר קטן עכשיו - אבל שווה להתאפק.</div></div>`;updateWallet();}
-function redeem(pi){const u=state.me;if(!u||u.admin||u.coach)return;const pz=PRIZES[pi];if(!pz)return;const cost=pz.p,name=pz.n;
+function cashOut(){const u=state.me;if(!u||u.admin)return;if(u.balance<=0)return;
+  const c0=Math.round(ils(u.balance)*CASH_KEEP);
+  if(!confirm("להמיר "+nf(u.balance)+" נק' ל-₪"+nf(c0)+" במזומן?\nמנוכה 35% - פרס שווה לך הרבה יותר!"))return;
+  syncFromStorage(u);if(u.balance<=0)return;const b=u.balance,c=Math.round(ils(b)*CASH_KEEP);u.balance=0;
+  (state.redemp[u.id]=state.redemp[u.id]||[]).push({id:++state.seq,rid:uid4(),name:"המרה לכסף ₪"+nf(c)+" (ניכוי 35%)",cost:b,cash:c,ts:Date.now(),status:"requested"});save();
+  celebrate("💵 בקשת המרה לכסף נשלחה: ₪"+nf(c)+" (הפסדת 35% - פרס היה שווה יותר)");renderPrizes();}
+function redeem(pi){const u=state.me;if(!u||u.admin)return;const pz=PRIZES[pi];if(!pz)return;const cost=pz.p,name=pz.n;
   syncFromStorage(u);/* מגן מפני מימוש כפול מטאב ישן - קוראים את היתרה העדכנית מהאחסון */
   if(u.balance<cost)return;u.balance-=cost;
   (state.redemp[u.id]=state.redemp[u.id]||[]).push({id:++state.seq,rid:uid4(),name,cost,ts:Date.now(),status:"requested"});save();
@@ -698,11 +752,16 @@ function renderRedemp(u){const rs=(state.redemp[u.id]||[]).slice().reverse();
 
 function renderRules(){$("#v-rules").innerHTML=`<div class="sec"><div class="kick">איך זה עובד</div><h1>המסע לפסגה - הכללים</h1>
   <div class="sec"><div class="kick">דרגות המעמד</div><h1 style="font-size:22px">כמו נוסע מתמיד - ככל שעולים, מקבלים יותר</h1>
-    <div class="muted" style="font-size:14px;max-width:720px">כל דרגה נותנת <b>מכפיל נקודות</b> גבוה יותר ו<b>פותחת פרסים חדשים</b>. הדרגה נשמרת עם requalification שנתי - הפחד לאבד דרגה שומר אותך חד.</div>
+    <div class="muted" style="font-size:14px;max-width:720px">כל דרגה נותנת <b>מכפיל נקודות</b> גבוה יותר ו<b>פותחת פרסים חדשים</b>. ה-VVS מצטבר על ערך מאומת - ככל שממשיכים לייצר ללקוחות, מטפסים.</div>
     <div class="tiershow">${TIERS.map((t,i)=>`<div class="tcard ${t.metal}"><div style="font-size:36px;text-align:center;line-height:1">${t.ico}</div><div class="tn">${t.n}</div><div class="te">${t.en}</div>
       <div class="thr">${t.min===0?"דרגת פתיחה":t.min>=99999999?"בהזמנה בלבד":"מ-"+nf(t.min)+" VVS"}</div>
       <div class="newhere">🔓 ${t.newHere}</div>
       <div class="mult">${t.mult?"מכפיל ×"+t.mult:"מעמד הנהלה"}</div></div>`).join("")}</div>
+  </div>
+  <div class="sec"><div class="kick">בונוסים במזומן - מעבר לנקודות 💵</div>
+    <div class="muted" style="font-size:14px;max-width:720px;margin-bottom:10px">חלק מההישגים נותנים גם <b>כסף אמיתי</b>, בנוסף לנקודות ולעמלת השירות:</div>
+    <div class="grid g2">${TRIGGERS.filter(t=>t.cash).map(t=>`<div class="card"><div style="font-weight:900">${t.label.replace(/^[A-Z] · /,"")}</div><div style="font-size:24px;font-weight:900;color:var(--good,#25b877);margin:4px 0">+${nf(t.cash)} ₪ מזומן</div><div class="muted" style="font-size:12.5px">ל${esc(t.cashto)} · <b>${nf(t.pts)} נק'</b> בנוסף</div></div>`).join("")}</div>
+    <div class="note" style="margin-top:10px;font-size:12.5px">הבונוס במזומן משולם בכניסת הלקוח לשירות. הפניה (פה-לאוזן): 1,000 ₪ למנהל המחלקה, לחלוקה עם מנהל הכספים לפי מידת האקטיביות שלו בהבאת הלקוח.</div>
   </div>
   <div class="sec grid g2">
     <div class="card"><div style="font-weight:900;margin-bottom:8px">מה מתעדכן לבד <span class="auto">אוטומטי</span></div>
