@@ -307,7 +307,7 @@
   </div>
   <div class="navtier" id="navTier" style="display:none"></div>
   <div class="navwallet" id="navWallet" style="display:none"><span>💰</span><span class="c" id="navWalletC">0</span><small>נק'</small></div>
-  <div class="whoami" id="whoami" onclick="logout()"><span class="av" id="waAv"></span><span class="nm" id="waNm"></span><span class="muted" style="font-size:11px">החלף</span></div>
+  <div class="whoami" id="whoami" onclick="askLogout()"><span class="av" id="waAv"></span><span class="nm" id="waNm"></span><span class="muted" style="font-size:11px">יציאה</span></div>
 </div>
 
 <canvas id="confetti"></canvas><div class="toast" id="toast"></div>
@@ -487,7 +487,7 @@ function renderLogin(){$("#nav").style.display="none";$("#app").style.display="n
     return `<div class="ucard" onclick="enter(USERS.find(x=>x.id==='${u.id}'))"><div class="av" style="background:${u.color}">${esc(initials(u.name))}</div>
     <div class="nm">${esc(u.name)}</div><div class="role">${esc(u.role)}${u.dept!=="-"?" · מח' "+esc(u.dept):""}</div>
     ${t?`<span class="tiertag ${t.metal}">${t.ico} ${t.n}</span>`:`<span class="tiertag metal-black">👑 אדמין</span>`}</div>`}).join("");}
-function enter(u){if(u.admin){pendingAdmin=u;showPin();return;}doEnter(u);}
+function enter(u){if(u.admin||u.coach){pendingAdmin=u;showPin();return;}doEnter(u);}
 function doEnter(u){state.me=u;$("#login").style.display="none";$("#nav").style.display="flex";$("#app").style.display="block";
   $("#waAv").style.background=u.color;$("#waAv").textContent=initials(u.name);$("#waNm").textContent=u.name;save();switchView("dash");
   if(!u.admin&&!u.coach){setTimeout(()=>{if(!state.me||$("#modal").classList.contains("show"))return;if(!localStorage.getItem("introSeen_"+u.id)){localStorage.setItem("introSeen_"+u.id,"1");maybeTempt();}else{maybeNudge();}},1500);}}
@@ -513,6 +513,7 @@ function adminGate(){pendingAdmin="__pick__";showPin();}
 function checkPin(){const v=($("#pinInput").value||"").trim();if(v===ADMIN_PIN){if(pendingAdmin==="__pick__"){adminPick();}else{const u=pendingAdmin;pendingAdmin=null;closeModal();doEnter(u);}}else{$("#pinErr").textContent="קוד שגוי, נסה שוב";$("#pinInput").value="";$("#pinInput").focus();}}
 function adminPick(){pendingAdmin=null;const admins=USERS.filter(u=>u.admin);$("#modalBody").innerHTML=`<div class="mm">👑</div><h3>מי נכנס לניהול?</h3><div class="sub">בחר את עצמך כדי להיכנס לאישורים.</div><div style="display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap">${admins.map(a=>`<div class="ucard" style="cursor:pointer;min-width:120px;margin:0" onclick="closeModal();doEnter(USERS.find(x=>x.id==='${a.id}'))"><div class="av" style="background:${a.color}">${esc(initials(a.name))}</div><div class="nm">${esc(a.name)}</div><div class="role">👑 אדמין</div></div>`).join("")}</div><button class="skip" style="margin-top:14px" onclick="closeModal();renderLogin()">ביטול</button>`;}
 function logout(){state.me=null;save();renderLogin();}
+function askLogout(){if(confirm("לצאת מהחשבון של "+(state.me?state.me.name:"")+" ולחזור למסך הבחירה?"))logout();}
 function updateWallet(){const u=state.me,w=$("#navWallet"),tc=$("#navTier");
   if(u&&!u.admin){w.style.display="flex";$("#navWalletC").textContent=nf(u.balance);const t=userTier(u);tc.style.display="flex";tc.className="navtier "+t.metal;tc.innerHTML=`<span class="em">${t.ico}</span> ${t.n}`;}
   else{w.style.display="none";tc.style.display="none";}}
@@ -619,17 +620,29 @@ function renderAdmin(){const players=USERS.filter(u=>!u.admin),pend=pendingList(
       <div class="acts"><button class="ok" title="סופק" onclick="fulfillRedemp('${u.id}',${r.id})">✓ סופק</button><button class="no" title="דחה והחזר נקודות" onclick="denyRedemp('${u.id}',${r.id})">✗</button></div></div>`).join("")}</div>`
     :`<div class="card"><div class="muted">אין בקשות מימוש פתוחות. כשעובד מממש פרס - הבקשה תגיע לכאן לאספקה.</div></div>`}
   </div>
+  ${(()=>{const cos=USERS.filter(u=>u.coach&&!u.admin&&u.overridePending>0);return cos.length?`<div class="sec"><div class="kick">שחרור אוברררייד למנהלי מחלקה (${cos.length})</div>
+    <div class="note" style="font-size:12.5px;margin-bottom:8px">מנהל מחלקה צובר 15% מהצוות שלו כ"ממתין". אתה משחרר לארנק שלו אחרי סקירה - ככה המאשר לא מזכה את עצמו.</div>
+    <div class="appr">${cos.map(co=>`<div class="row"><span class="av" style="background:${co.color}">${esc(initials(co.name))}</span><div class="info"><b>${esc(co.name)}</b> · מחלקה ${esc(co.dept)}<div class="d">⏳ ${nf(co.overridePending)} נק' אוברררייד ממתינים</div></div><div class="acts"><button class="ok" title="שחרר" onclick="releaseOverride('${co.id}')">✓ שחרר</button></div></div>`).join("")}</div></div>`:"";})()}
+  ${(()=>{const cl=(state.cashLedger||[]).filter(r=>r.status==="pending_payout");const paid=(state.cashLedger||[]).filter(r=>r.status==="paid").length;return `<div class="sec"><div class="kick">התחייבויות מזומן ${cl.length?`(${cl.length} פתוחות)`:""}</div>
+    <div class="note" style="font-size:12.5px;margin-bottom:8px">כל בונוס מזומן (500/1,000/1,500 ₪) מאירוע מאושר נרשם כאן. סה"כ פתוח: <b>${nf(cl.reduce((a,b)=>a+b.amount,0))} ₪</b>${paid?` · שולמו: ${paid}`:""}. התשלום בפועל ידני - סמן כשולם.</div>
+    ${cl.length?`<div class="appr">${cl.map(r=>{const by=USERS.find(x=>x.id===r.byUser);return `<div class="row"><span class="pts" style="color:var(--good,#25b877)">${nf(r.amount)}₪</span><div class="info"><b>ל${esc(r.cashto||"")}</b> · ${esc(r.short||r.trigger)}<div class="d">${by?esc(by.name)+" · ":""}${esc(r.forClient||"")} · ${fmtDate(r.ts)}</div></div><div class="acts"><button class="ok" title="שולם" onclick="markCashPaid('${r.rid}')">✓ שולם</button></div></div>`}).join("")}</div>`:`<div class="card"><div class="muted">אין התחייבויות מזומן פתוחות.</div></div>`}</div>`;})()}
   ${deptVs()}
   <div class="sec"><div class="kick">דירוג אישי</div>${leadTable(players.filter(p=>!p.coach),true)}</div>
   <div class="sec"><div class="kick">מנהלי מחלקה</div>${leadTable(players.filter(p=>p.coach),true)}</div></div>`;updateWallet();}
 function refreshApprovals(){if(state.me&&state.me.admin)renderAdmin();else if(state.me&&state.me.coach)renderCoach();}
 function canApprove(u){return !!(state.me&&u&&state.me.id!==u.id&&(state.me.admin||(state.me.coach&&state.me.dept===u.dept&&!u.coach)));}
 function approveLog(uid,id){const u=USERS.find(x=>x.id===uid),l=(state.logs[uid]||[]).find(x=>x.id===id);if(!u||!l||l.status!=="pending"||!canApprove(u))return;
-  l.status="approved";u.balance+=l.pts;if(l.vvs)u.career+=l.pts;u.refs+=(l.addedRefs||0);u.streak+=(l.addedStreak||0);u.stars+=(l.addedStars||0);
-  if(!u.coach&&!u.admin){const co=USERS.find(x=>x.coach&&!x.admin&&x.dept===u.dept);if(co){const ov=Math.round(l.pts*OVERRIDE);co.balance+=ov;co.career+=ov;co.overrideEarned=(co.overrideEarned||0)+ov;}}
+  l.status="approved";l.approvedBy=state.me.id;l.approvedAt=Date.now();
+  u.balance+=l.pts;if(l.vvs)u.career+=l.pts;u.refs+=(l.addedRefs||0);u.streak+=(l.addedStreak||0);u.stars+=(l.addedStars||0);
+  /* אוברררייד למנהל המחלקה נצבר כ"ממתין" ומשוחרר רק ע"י אופק - מבטל ניגוד עניינים (המאשר אינו מזכה את עצמו) */
+  if(!u.coach&&!u.admin){const co=USERS.find(x=>x.coach&&!x.admin&&x.dept===u.dept);if(co){co.overridePending=(co.overridePending||0)+Math.round(l.pts*OVERRIDE);}}
+  /* ספר התחייבויות מזומן - נרשם אוטומטית על טריגר עם בונוס מזומן */
+  const t=TRIGGERS.find(x=>x.k===l.type);if(t&&t.cash){(state.cashLedger=state.cashLedger||[]).push({id:++state.seq,rid:uid4(),trigger:l.type,short:l.short,amount:t.cash,cashto:t.cashto,forClient:l.client,byUser:u.id,approvedBy:state.me.id,ts:Date.now(),status:"pending_payout"});}
   save();celebrate("✓ אושר · "+nf(l.pts)+" נק' נכנסו לארנק");refreshApprovals();}
+function releaseOverride(coachId){if(!state.me||!state.me.admin)return;const co=USERS.find(x=>x.id===coachId);if(!co||!(co.overridePending>0))return;const ov=co.overridePending;co.balance+=ov;co.career+=ov;co.overrideEarned=(co.overrideEarned||0)+ov;co.overridePending=0;save();celebrate("✓ שוחרר אוברררייד "+nf(ov)+" נק' ל"+co.name);renderAdmin();}
+function markCashPaid(rid){if(!state.me||!state.me.admin)return;const r=(state.cashLedger||[]).find(x=>x.rid===rid);if(r&&r.status==="pending_payout"){r.status="paid";r.paidBy=state.me.id;r.paidAt=Date.now();save();renderAdmin();}}
 function rejectLog(uid,id){const u=USERS.find(x=>x.id===uid),l=(state.logs[uid]||[]).find(x=>x.id===id);if(!u||!l||l.status!=="pending"||!canApprove(u))return;
-  l.status="rejected";save();refreshApprovals();/* כלום לא נכנס לפני אישור - אין מה לקזז */}
+  l.status="rejected";l.approvedBy=state.me.id;l.approvedAt=Date.now();save();refreshApprovals();/* כלום לא נכנס לפני אישור - אין מה לקזז */}
 function teamPending(dep){const out=[];USERS.forEach(u=>{if(u.admin||u.coach||u.dept!==dep)return;(state.logs[u.id]||[]).forEach(l=>{if(l.status==="pending")out.push({u,l})})});return out;}
 function renderCoach(){const c=state.me,tp=teamPending(c.dept),team=USERS.filter(x=>!x.admin&&!x.coach&&x.dept===c.dept);
   $("#v-dash").innerHTML=`<div class="sec"><div class="kick">מנהל מחלקה ${esc(c.dept)} - ${esc(c.name)}</div><h1>הצוות שלי + אישורים</h1>
@@ -644,7 +657,7 @@ function renderCoach(){const c=state.me,tp=teamPending(c.dept),team=USERS.filter
   <div class="grid g2">
     <div class="card"><div style="font-weight:900;margin-bottom:4px">הארנק שלי</div>
       <div style="font-size:34px;font-weight:900">${nf(c.balance)} <span style="font-size:14px;color:var(--muted)">נק'</span></div>
-      <div class="muted" style="font-size:13px;margin-top:4px">מתוכן <b style="color:var(--ink)">${nf(c.overrideEarned||0)}</b> נק' אוברררייד - <b>15%</b> מכל הישג מאושר של הצוות שלך. אתה מנצח כשהם מנצחים.</div>
+      <div class="muted" style="font-size:13px;margin-top:4px">מתוכן <b style="color:var(--ink)">${nf(c.overrideEarned||0)}</b> נק' אוברררייד ששוחררו - <b>15%</b> מכל הישג מאושר של הצוות שלך. אתה מנצח כשהם מנצחים.${c.overridePending>0?`<br>⏳ <b>${nf(c.overridePending)}</b> נק' אוברררייד ממתינים לשחרור מאופק.`:""}</div>
       <div class="note" style="margin-top:12px;font-size:12.5px">כל נקודה של כל אחד מ-${team.length} אנשי הצוות = 15% אליך. זה מצטבר לטיסות ולפרסים הגדולים. <button class="btn" style="margin-top:8px" onclick="switchView('prizes')">לקטלוג הפרסים ←</button></div></div>
     <div class="card"><div style="font-weight:900;margin-bottom:4px">תעד הישג ניהולי</div>
       <div class="muted" style="font-size:12.5px;margin-bottom:8px">הישגים ברמת המחלקה - נשלחים לאישור אופק.</div>
@@ -701,21 +714,23 @@ function maybeTempt(){const u=state.me;if(!u||u.admin||u.coach)return;const smal
     <button class="skip" onclick="closeModal()">אחליט אחר כך</button>`;
   $("#modal").classList.add("show");}
 function closeModal(){$("#modal").classList.remove("show");}
-function temptRedeem(cost,name){closeModal();const u=state.me;if(u.balance>=cost){u.balance-=cost;(state.redemp[u.id]=state.redemp[u.id]||[]).push({id:++state.seq,name,cost,ts:Date.now(),status:"requested"});save();celebrate("🎁 בקשת מימוש נשלחה! בפעם הבאה אולי תחכה לגדול 😉");$("#v-prizes").classList.contains("hidden")?renderDash():renderPrizes();}}
+function temptRedeem(cost,name){closeModal();const u=state.me;if(!u||u.admin)return;syncFromStorage(u);if(u.balance>=cost){u.balance-=cost;(state.redemp[u.id]=state.redemp[u.id]||[]).push({id:++state.seq,rid:uid4(),name,cost,ts:Date.now(),status:"requested"});save();celebrate("🎁 בקשת מימוש נשלחה! בפעם הבאה אולי תחכה לגדול 😉");$("#v-prizes").classList.contains("hidden")?renderDash():renderPrizes();}}
 function temptWait(){closeModal();celebrate("💪 כבוד! סבלנות משתלמת - אתה בדרך לפסגה");}
 
 let boardFilter="all";
-function deptVs(){const a=deptScore("A"),b=deptScore("B"),tot=a+b,ap=tot?a/tot*100:50,lead=a>=b?"A · יוראי":"B · עומר",gap=Math.abs(a-b);
+function deptCount(dep){return USERS.filter(u=>!u.admin&&!u.coach&&u.dept===dep).length||1;}
+function deptVs(){const a=deptScore("A"),b=deptScore("B"),tot=a+b,ap=tot?a/tot*100:50;
+  const aAvg=a/deptCount("A"),bAvg=b/deptCount("B"),lead=aAvg>=bAvg?"A · יוראי":"B · עומר",gap=Math.abs(a-b);/* מנצח לפי ממוצע-לראש - הוגן גם כשמחלקות בגודל שונה */
   const goal=170000,floor=70000,combined=a+b,gp=Math.min(100,combined/goal*100),bothOver=a>=floor&&b>=floor;
   return `<div class="sec"><div class="kick">תחרות קבוצתית - מה יוצא לכם מזה</div><div class="card"><div style="font-weight:900;margin-bottom:8px">מחלקה מול מחלקה 🏆</div>
     <div class="vs"><div class="team a"><div class="tt">מחלקה A · יוראי</div><div class="sc">${nf(a)}</div><div class="mm">שוהם · אושרי · עידו</div></div>
       <div class="mid">VS</div>
       <div class="team b"><div class="tt">מחלקה B · עומר</div><div class="sc">${nf(b)}</div><div class="mm">בן חזן · אריק · טלי · עידו נחום</div></div></div>
     <div class="vsbar"><div class="a" style="width:${ap}%"></div><div class="b" style="width:${100-ap}%"></div></div>
-    <div class="muted" style="font-size:12.5px;margin-top:8px">מובילה כרגע: <b>מחלקה ${lead}</b> (פער ${nf(gap)} VVS). סך VVS מאומת של כל חברי המחלקה. מתחרים אישית, מנצחים ביחד.</div>
-    <div style="font-weight:800;font-size:13px;margin-top:12px">📅 תיעוד רבעוני - כל רבעון נמדד בנפרד ומתאפס:</div>
-    <div class="tblwrap"><table class="qtable"><thead><tr><th>רבעון</th><th>מחלקה A</th><th>מחלקה B</th><th>מנצחת</th></tr></thead><tbody>
-      <tr><td>Q3 2026 (רבעון פתיחה)</td><td>${nf(a)}</td><td>${nf(b)}</td><td class="win">${a===0&&b===0?"נפתח 0:0":lead.split(" ")[0]+" מוביל/ה"}</td></tr>
+    <div class="muted" style="font-size:12.5px;margin-top:8px">מובילה כרגע: <b>מחלקה ${lead}</b> (המנצחת נקבעת לפי <b>ממוצע-לראש</b> - הוגן גם כשמספר המנהלים שונה). סך VVS מאומת של כל חברי המחלקה. מתחרים אישית, מנצחים ביחד.</div>
+    <div style="font-weight:800;font-size:13px;margin-top:12px">📅 טבלת מחלקות - מצטבר מתחילת המועדון:</div>
+    <div class="tblwrap"><table class="qtable"><thead><tr><th>תקופה</th><th>מחלקה A</th><th>מחלקה B</th><th>מובילה (ממוצע/ראש)</th></tr></thead><tbody>
+      <tr><td>מתחילת המועדון · Q3 2026</td><td>${nf(a)}</td><td>${nf(b)}</td><td class="win">${a===0&&b===0?"נפתח 0:0":lead.split(" ")[0]+" מוביל/ה"}</td></tr>
     </tbody></table></div>
     <div class="deptprize">🍽️ <b>פרס מחלקה מובילה - רבעוני:</b> המחלקה שמנצחת ברבעון מקבלת <b>1,000 ₪</b> לארוחה מחלקתית או פעילות שתבחרו (אפשר להוסיף מהכיס לשדרג) + יתרון בטיסת הפסגה השנתית.</div>
     <div style="margin-top:10px;background:linear-gradient(135deg,#eef8fb,#e3f2f7);border:1px solid #bfe4ec;border-radius:12px;padding:12px 14px;color:#1d4a56">
