@@ -383,6 +383,7 @@ const JOINED="1.7.2026";
 const IMG="https://images.unsplash.com/photo-";const Q="?auto=format&fit=crop&w=600&q=70";
 // prizes rescaled: small grabbable early (hook) but "not worth it" vs the big ones; big = real long effort
 const PRIZES=[
+  {n:"ארוחת צהריים עסקית על החברה",p:600,minTier:0,band:"הזכייה הראשונה · מיידי - הישג אחד ואתה שם",cls:"",ic:"coffee",img:IMG+"1504674900247-0877df9cc836"+Q},
   {n:"שובר BuyMe / ארוחה זוגית",p:1500,minTier:0,band:"קטן · אפשר מהר - אבל שווה לחכות",cls:"",ic:"gift",img:IMG+"1513885535751-8b9238bd345a"+Q},
   {n:"ארוחת בוקר עם אופק / אלירן",p:4500,minTier:0,band:"מיוחד · הזמן היקר שלנו · 4-6 עיניים על העסק שלך",cls:"halo",ic:"coffee",img:IMG+"1521017432531-fbd92d768814"+Q},
   {n:"אוזניות / רמקול נייד",p:3000,minTier:0,band:"קטן · ~1-2 ח'",cls:"",ic:"airpods",img:IMG+"1608043152269-423dbba4e7e1"+Q},
@@ -956,7 +957,7 @@ function renderRedemp(u){const rs=(state.redemp[u.id]||[]).slice().reverse();
   if(!rs.length)return `<div class="muted" style="font-size:13px">עדיין לא מימשת פרסים. כשתממש - הבקשה תישלח להנהלה לאספקה ותופיע כאן.</div>`;
   return `<div class="feed">${rs.map(r=>{const st=r.status==="fulfilled"?["ok","✓ סופק"]:r.status==="denied"?["no","↩ נדחה (הוחזר)"]:["pend","⏳ בטיפול ההנהלה"];return `<div class="row"><span class="dot" style="background:#f6894f"></span>🎁 ${esc(r.name)} <span class="hb ${st[0]}">${st[1]}</span><span style="font-size:11px;color:var(--muted);margin-inline-start:8px">${fmtDate(r.ts)}</span><span class="pts" style="color:${r.status==="denied"?"var(--good)":"var(--red)"};margin-inline-start:auto">${r.status==="denied"?"+":"-"}${nf(r.cost)}</span></div>`}).join("")}</div>`;}
 
-function renderRules(){$("#v-rules").innerHTML=`<div class="sec"><div class="kick">איך זה עובד</div><h1>המסע לפסגה - הכללים</h1>
+function renderRules(){$("#v-rules").innerHTML=`<div class="sec"><div class="kick">איך זה עובד</div><h1>המסע לפסגה - הכללים</h1><div class="note" style="margin-top:8px;border-inline-start:3px solid var(--teal,#2299b3);background:rgba(34,153,177,.07);font-size:13px"><b>הנקודות, הדרגה והחיסכון לפרס - שלך לכל החיים.</b> לא פגים, לא מתאפסים לעולם. מה שצברת נשאר עד שתבחר לממש. רק <b>תחרות המחלקות הרבעונית</b> מתחילה מחדש כל עונה (כדי שלכולם יש סיכוי) - והיא לא נוגעת בנקודות, בדרגה או בפרסים שלך.</div>
   <div class="sec"><div class="kick">דרגות המעמד</div><h1 style="font-size:22px">כמו נוסע מתמיד - ככל שעולים, מקבלים יותר</h1>
     <div class="muted" style="font-size:14px;max-width:720px">כל דרגה נותנת <b>מכפיל נקודות</b> גבוה יותר ו<b>פותחת פרסים חדשים</b>. ה-VVS מצטבר על ערך מאומת - ככל שממשיכים לייצר ללקוחות, מטפסים.</div>
     <div class="tiershow">${TIERS.map((t,i)=>`<div class="tcard ${t.metal}"><div style="font-size:36px;text-align:center;line-height:1">${t.ico}</div><div class="tn">${t.n}</div><div class="te">${t.en}</div>
