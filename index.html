@@ -968,6 +968,7 @@ function renderRules(){$("#v-rules").innerHTML=`<div class="sec"><div class="kic
     <div class="muted" style="font-size:14px;max-width:720px;margin-bottom:10px">חלק מההישגים נותנים גם <b>כסף אמיתי</b>, בנוסף לנקודות ולעמלת השירות:</div>
     <div class="grid g2">${TRIGGERS.filter(t=>t.cash).map(t=>`<div class="card"><div style="font-weight:900">${t.label.replace(/^[A-Z] · /,"")}</div><div style="font-size:24px;font-weight:900;color:var(--good,#25b877);margin:4px 0">+${nf(t.cash)} ₪ מזומן</div><div class="muted" style="font-size:12.5px">ל${esc(t.cashto)} · <b>${nf(t.pts)} נק'</b> בנוסף</div></div>`).join("")}</div>
     <div class="note" style="margin-top:10px;font-size:12.5px">הבונוס במזומן משולם בכניסת הלקוח לשירות. הפניה (פה-לאוזן): 1,000 ₪ למנהל המחלקה, לחלוקה עם מנהל הכספים לפי מידת האקטיביות שלו בהבאת הלקוח.</div>
+    <div class="note" style="margin-top:8px;font-size:12.5px;border-inline-start:3px solid var(--good,#25b877);background:rgba(37,184,119,.06)">💸 <b>תגמול נוסף על קרוס-סייל:</b> מעבר לנקודות, כל לקוח שהפנית ל<b>אשראי / טכנולוגיה / מועדון לקוחות / נוער עשיר</b> ונסגר - מזכה אותך גם ב<b>תגמול מזומן אישי</b>, לפי המודל של אותה חטיבה. כל מקרה לגופו: אין אחוז קבוע או עמלה אחידה - זה נקבע בהתאמה אישית, מסודר ומשולם בנפרד, ומצטבר לך מעבר לנקודות שאתה כבר מקבל כאן.</div>
   </div>
   ${(state.me&&(state.me.coach||state.me.admin))?`<div class="sec"><div class="kick">מנהל מחלקה - המודל שלך 👑</div>
     <h1 style="font-size:22px">עומר ויוראי - מנצחים כשהצוות מנצח</h1>
