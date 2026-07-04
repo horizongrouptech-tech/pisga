@@ -924,7 +924,7 @@ function renderRules(){$("#v-rules").innerHTML=`<div class="sec"><div class="kic
     <div class="grid g2">${TRIGGERS.filter(t=>t.cash).map(t=>`<div class="card"><div style="font-weight:900">${t.label.replace(/^[A-Z] · /,"")}</div><div style="font-size:24px;font-weight:900;color:var(--good,#25b877);margin:4px 0">+${nf(t.cash)} ₪ מזומן</div><div class="muted" style="font-size:12.5px">ל${esc(t.cashto)} · <b>${nf(t.pts)} נק'</b> בנוסף</div></div>`).join("")}</div>
     <div class="note" style="margin-top:10px;font-size:12.5px">הבונוס במזומן משולם בכניסת הלקוח לשירות. הפניה (פה-לאוזן): 1,000 ₪ למנהל המחלקה, לחלוקה עם מנהל הכספים לפי מידת האקטיביות שלו בהבאת הלקוח.</div>
   </div>
-  <div class="sec"><div class="kick">מנהל מחלקה - המודל שלך 👑</div>
+  ${(state.me&&(state.me.coach||state.me.admin))?`<div class="sec"><div class="kick">מנהל מחלקה - המודל שלך 👑</div>
     <h1 style="font-size:22px">עומר ויוראי - מנצחים כשהצוות מנצח</h1>
     <div class="muted" style="font-size:14px;max-width:740px;margin-bottom:12px">שקיפות מלאה - בדיוק איך מנהל מחלקה מרוויח מהמועדון, מעבר לתחרות הקבוצתית:</div>
     <div class="grid g2">
@@ -934,7 +934,7 @@ function renderRules(){$("#v-rules").innerHTML=`<div class="sec"><div class="kic
       <div class="card"><div style="font-weight:900;font-size:15px">🎁 כל הקטלוג פתוח + מזומן</div><div style="font-size:13.5px;color:var(--ink2);line-height:1.7;margin-top:5px">אתה פודה <b>כל פרס</b> בקטלוג (טיסות, MacBook, הכל) כמעמד ניהול. ובונוס הפניה <b>1,000 ₪</b> מגיע אליך (לשיקולך עם מנהל הכספים).</div></div>
     </div>
     <div class="note" style="margin-top:10px;font-size:12.5px">👑 סטטוס <b>המעגל הפנימי</b> שלך קבוע - מעמד הנהלה, לא נצבר דרך נקודות. הנקודות שלך הן לפרסים. כלכלית: מנהל מחלקה מגיע לטיסה תוך ~2-3 שנים.</div>
-  </div>
+  </div>`:""}
   <div class="sec grid g2">
     <div class="card"><div style="font-weight:900;margin-bottom:8px">מה מתעדכן לבד <span class="auto">אוטומטי</span></div>
       <ul style="margin:0;padding-inline-start:18px;color:var(--ink2);font-size:14px;line-height:1.9"><li>העמלה החודשית מהתיק שלך</li><li>נקודות וותק לקוח - כל עוד הלקוח בריא</li><li>דירוג הליגה, ה-VVS ותחרות המחלקות</li><li>טיימר הבשלה והרצף</li><li>עץ ההפניות</li></ul></div>
