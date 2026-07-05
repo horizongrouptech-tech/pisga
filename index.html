@@ -674,7 +674,7 @@ function renderDash(){const u=state.me;if(u.admin)return renderAdmin();if(u.coac
   <div class="sec grid g2" style="margin-top:12px">
     <div class="card"><div style="font-weight:900;margin-bottom:4px">הארנק שלי</div>
       <div style="font-size:34px;font-weight:900">${nf(u.balance)} <span style="font-size:15px;color:var(--muted)">נק'</span></div>
-      <div class="muted" style="font-size:13px;margin-top:4px">${pend?`⏳ ${nf(pend)} נק' ממתינות לאישור אופק - ייכנסו לארנק כשיאשר (ה-VVS והדרגה כבר עודכנו)`:"אין נקודות בהמתנה"}</div>
+      <div class="muted" style="font-size:13px;margin-top:4px">${pend?`⏳ ${nf(pend)} נק' ממתינות לאישור - <b>עדיין לא נספרו</b> (לא בארנק, לא בליגה, לא בדרגה). ייכנסו במלואן ברגע שאופק יאשר`:"אין נקודות בהמתנה"}</div>
       <div class="note" style="margin-top:14px;font-size:12.5px">💪 הפרסים הגדולים דורשים מסע של שנה-שנתיים - צריך לעבוד בשביל זה. הקטנים כבר בהישג יד, אבל שווה להתאפק לגדול.</div></div>
     <div class="card"><div style="font-weight:900;margin-bottom:6px">מה מזיז לך את המחט</div>
       <div class="muted" style="font-size:13.5px;margin-bottom:8px">הליגה עולה רק על ערך מאומת (A+B), מוכפל ×${t.mult}:</div>
@@ -700,7 +700,7 @@ function fmtDate(ts){if(!ts)return"";const d=new Date(ts);return d.getDate()+"/"
 function stBadge(s){return s==="approved"?'<span class="hb ok">✓ אושר</span>':s==="rejected"?'<span class="hb no">✗ נדחה</span>':'<span class="hb pend">⏳ ממתין</span>';}
 function renderMyFeed(){const logs=(state.logs[state.me.id]||[]).slice().reverse().slice(0,6),c=$("#myfeed");
   if(!logs.length){c.innerHTML=`<div class="muted" style="font-size:13px">עדיין לא תיעדת הישגים. כל הישג עובר לאישור אופק ואז מעלה אותך במסע.</div>`;return}
-  c.innerHTML=`<div class="feed">${logs.map(l=>{const b=l.status==="approved"?'<span class="badge ok">✓</span>':l.status==="rejected"?'<span class="badge no">✗ נדחה</span>':'<span class="badge">⏳ ממתין</span>';return `<div class="row"><span class="dot" style="background:${l.color}"></span>${esc(l.short)} ${l.client?`· ${esc(l.client)}`:""} ${b}<span class="pts">+${nf(l.pts)}</span></div>`}).join("")}</div>`;}
+  c.innerHTML=`<div class="feed">${logs.map(l=>{const pnd=l.status==="pending",rej=l.status==="rejected";const b=l.status==="approved"?'<span class="badge ok">✓</span>':rej?'<span class="badge no">✗ נדחה</span>':'<span class="badge">⏳ ממתין</span>';return `<div class="row" style="${pnd?'opacity:.55':''}"><span class="dot" style="background:${l.color}"></span>${esc(l.short)} ${l.client?`· ${esc(l.client)}`:""} ${b}<span class="pts" style="${pnd?'color:var(--muted);font-weight:800':rej?'color:var(--muted);text-decoration:line-through':''}">${rej?'':'+'}${nf(l.pts)}</span></div>`}).join("")}</div>`;}
 function renderHistory(u){const logs=state.logs[u.id]||[],total=logs.length;
   if(!total)return `<div class="muted" style="font-size:13px">עדיין אין הישגים בהיסטוריה. תעד את הראשון - הכל יישמר כאן ולא ניתן למחוק.</div>`;
   const appr=logs.filter(l=>l.status==="approved").reduce((a,b)=>a+b.pts,0),pend=logs.filter(l=>l.status==="pending").length,rej=logs.filter(l=>l.status==="rejected").length;
