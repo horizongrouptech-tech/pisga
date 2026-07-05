@@ -383,7 +383,7 @@ const JOINED="1.7.2026";
 const IMG="https://images.unsplash.com/photo-";const Q="?auto=format&fit=crop&w=600&q=70";
 // prizes rescaled: small grabbable early (hook) but "not worth it" vs the big ones; big = real long effort
 const PRIZES=[
-  {n:"ארוחת צהריים עסקית",p:600,minTier:0,band:"על החברה · הזכייה הראשונה - הישג אחד ואתה שם",cls:"",ic:"coffee",img:IMG+"1504674900247-0877df9cc836"+Q},
+  {n:"ארוחת צהריים עסקית (יחיד)",p:800,minTier:0,band:"על החברה · פרס הכניסה - הכי מהיר להשיג",cls:"",ic:"coffee",img:IMG+"1504674900247-0877df9cc836"+Q},
   {n:"שובר BuyMe / ארוחה זוגית",p:1500,minTier:0,band:"קטן · אפשר מהר - אבל שווה לחכות",cls:"",ic:"gift",img:IMG+"1513885535751-8b9238bd345a"+Q},
   {n:"ארוחת בוקר עם אופק / אלירן",p:4500,minTier:0,band:"מיוחד · הזמן היקר שלנו · 4-6 עיניים על העסק שלך",cls:"halo",ic:"coffee",img:IMG+"1521017432531-fbd92d768814"+Q},
   {n:"אוזניות / רמקול נייד",p:3000,minTier:0,band:"קטן · ~1-2 ח'",cls:"",ic:"airpods",img:IMG+"1608043152269-423dbba4e7e1"+Q},
@@ -501,7 +501,10 @@ function mergeRows(u,lg,rd,ch,an,mseq){USERS=SEED.map((s,i)=>Object.assign({},s,
   let mx=mseq||0;Object.values(state.logs).forEach(a=>a.forEach(l=>{if(l.id>mx)mx=l.id}));Object.values(state.redemp).forEach(a=>a.forEach(r=>{if(r.id>mx)mx=r.id}));state.cashLedger.forEach(r=>{if(r.id>mx)mx=r.id});state.anns.forEach(a=>{if(a.id>mx)mx=a.id});state.seq=Math.max(state.seq||0,mx);
   if(state.me){const f=USERS.find(x=>x.id===state.me.id);if(f)state.me=f;}}
 async function pullRemote(reRender){if(pulling||pushPending)return false;pulling=true;try{const a=await Promise.all([sbGet("users"),sbGet("logs"),sbGet("redemptions"),sbGet("cash_ledger"),sbGet("meta"),sbGet("announcements")]);sbOnline=true;if(!a[0].length){pulling=false;await pushRemote();return true;}mergeRows(a[0],a[1],a[2],a[3],a[5],(a[4].find(x=>x.k==="seq")||{}).v||0);saveLocal();updateBell();if(reRender)refreshView();maybeAnnounce();return true;}catch(e){sbOnline=false;return false;}finally{pulling=false;}}
-function refreshView(){if($("#modal").classList.contains("show"))return;if(!state.me||$("#app").style.display==="none"){if($("#login")&&$("#login").style.display!=="none")try{renderLogin()}catch(e){};return;}if(curView==="log")return;/* לא לשבש טופס תיעוד פתוח */try{({dash:renderDash,board:renderBoard,prizes:renderPrizes,rules:renderRules})[curView]();}catch(e){}}
+function refreshView(){if($("#modal").classList.contains("show"))return;if(!state.me||$("#app").style.display==="none"){if($("#login")&&$("#login").style.display!=="none")try{renderLogin()}catch(e){};return;}if(curView==="log")return;/* לא לשבש טופס תיעוד פתוח */
+  const _ae=document.activeElement;if(_ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(_ae.tagName))return;/* אל תבנה מחדש בזמן הקלדה */
+  const _at=$("#annTitle"),_ab=$("#annBody"),_gr=$("#gbReason");if((_at&&_at.value.trim())||(_ab&&_ab.value.trim())||(_gr&&_gr.value.trim()))return;/* אל תמחק טופס אדמין באמצע מילוי */
+  try{({dash:renderDash,board:renderBoard,prizes:renderPrizes,rules:renderRules})[curView]();}catch(e){}}
 function exportData(){const blob=localStorage.getItem("ascend7")||"{}";const a=document.createElement("a");a.href="data:application/json;charset=utf-8,"+encodeURIComponent(blob);a.download="pisga-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();}
 function importData(ev){const f=ev.target.files&&ev.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);if(!o||!o.users)throw 0;if(!confirm("לשחזר את הגיבוי? הפעולה תדרוס את הנתונים במכשיר הזה."))return;localStorage.setItem("ascend7",rd.result);localStorage.setItem("ascend7_bak",rd.result);location.reload();}catch(e){alert("קובץ גיבוי לא תקין.");}};rd.readAsText(f);}
 function uid4(){try{return crypto.randomUUID()}catch(e){return"r"+Date.now().toString(36)+Math.round(performance.now()).toString(36)}}
@@ -632,6 +635,7 @@ function switchView(v){curView=v;document.querySelectorAll(".nav .tab").forEach(
 function medalSVG(t){const c=t.k==="gold"?"#d9a531":t.k==="silver"?"#9aa7bd":t.k==="platinum"?"#7d8aa4":t.k==="black"?"#e9c463":"#2299b3";
   return `<svg viewBox="0 0 100 100"><circle cx="50" cy="40" r="24" fill="none" stroke="${c}" stroke-width="6"/><path d="M36 58 L29 92 L50 80 L71 92 L64 58" fill="${c}"/><circle cx="50" cy="40" r="12" fill="${c}" opacity=".45"/></svg>`}
 
+function targetCardHTML(u){const bal=u.balance||0,r=rate(u);if(typeof u.target==="number"&&PRIZES[u.target]){const p=PRIZES[u.target],prog=Math.min(100,bal/p.p*100),gap=Math.max(0,p.p-bal),eta=r>0&&gap>0?Math.max(1,Math.ceil(gap/r)):0;return `<div class="sec" style="margin-top:12px"><div class="card" style="border:1.5px solid #e0b53f;background:linear-gradient(135deg,#fffdf6,#fff6e0)"><div style="display:flex;align-items:center;gap:12px"><div class="fb" style="width:54px;height:54px;flex:none">${icon(p.ic)}</div><div style="flex:1"><div style="font-weight:900;font-size:16px">🎯 היעד שלי: ${esc(p.n)}</div><div class="muted" style="font-size:13px">${gap>0?`עוד <b style="color:var(--ink)">${nf(gap)}</b> נק' (מתוך ${nf(p.p)}) · <b>${Math.round(prog)}%</b>${eta?` · ~${eta} ח' בקצב שלך`:""}`:"הגעת! אפשר לממש 🎉"}</div></div></div><div class="bar" style="margin-top:10px"><i style="width:${prog}%;background:linear-gradient(90deg,#e0b53f,#f7e08f)"></i></div><div class="muted" style="font-size:11.5px;margin-top:5px">כל נקודה שנכנסת מקרבת אותך ליעד. אפשר לשנות יעד מהקטלוג בכל רגע.</div></div></div>`;}return `<div class="sec" style="margin-top:12px"><div class="card" style="border:1.5px dashed #e0b53f;background:linear-gradient(135deg,#fffdf6,#fff6e0)"><div style="display:flex;align-items:center;gap:12px"><div style="font-size:32px;flex:none">🎯</div><div style="flex:1"><div style="font-weight:900;font-size:15.5px">בחר לך יעד - ותתחיל לעבוד עליו</div><div class="muted" style="font-size:12.5px">בחר פרס מהקטלוג כ"יעד", ותקבל כאן פס התקדמות אישי. ככה מכניסים את הפרס לעבודה.</div></div><button onclick="switchView('prizes')" style="background:#e0b53f;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:800;cursor:pointer;flex:none;white-space:nowrap">בחר יעד ←</button></div></div></div>`;}
 function renderDash(){const u=state.me;if(u.admin)return renderAdmin();if(u.coach)return renderCoach();
   const t=tierOf(u.career),nt=nextTier(u.career),invite=nt&&nt.min>=99999999,showNext=nt&&!invite,prog=showNext?Math.min(100,((u.career-t.min)/(nt.min-t.min))*100):100,r=rate(u);
   const pend=(state.logs[u.id]||[]).filter(x=>x.status==="pending").reduce((a,b)=>a+b.pts,0);
@@ -816,6 +820,7 @@ function renderCoach(){const c=state.me,tp=teamPending(c.dept),team=USERS.filter
       <div id="clErr" style="display:none;color:#d9534f;font-size:13px;font-weight:700;margin:4px 0">חובה למלא פרטים.</div>
       <button class="btn" onclick="submitCoachLog()">＋ שלח לאישור אופק</button></div>
   </div></div>
+  ${targetCardHTML(c)}
   ${deptVs()}
   <div class="sec"><div class="kick">הצוות שלי</div>${leadTable(team)}</div></div>`;updateWallet();}
 
@@ -935,7 +940,7 @@ function renderPrizes(){const u=state.me,bal=u.admin?0:u.balance,r=u.admin?0:rat
       <div class="nm">${pz.n}</div><div class="pts">${nf(pz.p)} <span style="font-size:12px;color:var(--muted)">נק'</span></div><div class="eta">${pz.band}</div>
       ${u.admin?"":`<div class="bar" style="margin-top:8px"><i style="width:${prog}%"></i></div>
       <div class="eta">${!unlocked?`דורש דרגת ${TIERS[pz.minTier].n}`:can?"✅ אפשר לממש - אבל אולי כדאי לחסוך":`עוד ${nf(need)} נק'${eta>0?` · ~${eta} ח'`:""}`}</div>
-      <button class="redeem ${can?'can':'cant'}" ${can?`onclick="this.disabled=true;redeem(${pi})"`:"disabled"}>${!unlocked?"נעול":can?"ממש פרס":"עוד לא"}</button>${!u.coach?`<button onclick="setTarget(${pi})" style="margin-top:6px;width:100%;background:${u.target===pi?'#c9862a':'#eef2f8'};color:${u.target===pi?'#fff':'var(--ink,#22405a)'};border:1px solid var(--line,#d5deea);border-radius:9px;padding:7px;font-size:12.5px;font-weight:800;cursor:pointer">${u.target===pi?'🎯 היעד שלך':'🎯 קבע כיעד'}</button>`:""}`}
+      <button class="redeem ${can?'can':'cant'}" ${can?`onclick="this.disabled=true;redeem(${pi})"`:"disabled"}>${!unlocked?"נעול":can?"ממש פרס":"עוד לא"}</button>${!u.admin?`<button onclick="setTarget(${pi})" style="margin-top:6px;width:100%;background:${u.target===pi?'#c9862a':'#eef2f8'};color:${u.target===pi?'#fff':'var(--ink,#22405a)'};border:1px solid var(--line,#d5deea);border-radius:9px;padding:7px;font-size:12.5px;font-weight:800;cursor:pointer">${u.target===pi?'🎯 היעד שלך':'🎯 קבע כיעד'}</button>`:""}`}
     </div>`}).join("")}</div>
   <div class="note" style="margin-top:16px">💪 כל נקודה שתחסוך מקרבת אותך לפרס הגדול. אפשר קטן עכשיו - אבל שווה להתאפק.</div></div>`;updateWallet();}
 function cashOut(){const u=state.me;if(!u||u.admin)return;if(u.balance<=0)return;
@@ -944,7 +949,7 @@ function cashOut(){const u=state.me;if(!u||u.admin)return;if(u.balance<=0)return
   syncFromStorage(u);if(u.balance<=0)return;const b=u.balance,c=Math.round(ils(b)*CASH_KEEP);u.balance=0;
   (state.redemp[u.id]=state.redemp[u.id]||[]).push({id:++state.seq,rid:uid4(),name:"המרה לכסף ₪"+nf(c)+" (ניכוי 35%)",cost:b,cash:c,ts:Date.now(),status:"requested"});save();
   celebrate("💵 בקשת המרה לכסף נשלחה: ₪"+nf(c)+" (הפסדת 35% - פרס היה שווה יותר)");renderPrizes();}
-function setTarget(pi){const u=state.me;if(!u||u.admin||u.coach)return;u.target=(u.target===pi?undefined:pi);save();celebrate(u.target===pi?"🎯 "+PRIZES[pi].n+" נקבע כיעד שלך!":"היעד הוסר");renderPrizes();}
+function setTarget(pi){const u=state.me;if(!u||u.admin)return;u.target=(u.target===pi?undefined:pi);save();celebrate(u.target===pi?"🎯 "+PRIZES[pi].n+" נקבע כיעד שלך!":"היעד הוסר");renderPrizes();}
 function redeem(pi){const u=state.me;if(!u||u.admin)return;const pz=PRIZES[pi];if(!pz)return;const cost=pz.p,name=pz.n;
   syncFromStorage(u);/* מגן מפני מימוש כפול מטאב ישן - קוראים את היתרה העדכנית מהאחסון */
   if(u.balance<cost)return;u.balance-=cost;
