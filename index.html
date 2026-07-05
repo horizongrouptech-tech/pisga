@@ -383,21 +383,21 @@ const JOINED="1.7.2026";
 const IMG="https://images.unsplash.com/photo-";const Q="?auto=format&fit=crop&w=600&q=70";
 // prizes rescaled: small grabbable early (hook) but "not worth it" vs the big ones; big = real long effort
 const PRIZES=[
-  {n:"ארוחת צהריים עסקית (יחיד)",p:800,minTier:0,band:"על החברה · פרס הכניסה - הכי מהיר להשיג",cls:"",ic:"coffee",img:IMG+"1504674900247-0877df9cc836"+Q},
-  {n:"שובר BuyMe / ארוחה זוגית",p:1500,minTier:0,band:"קטן · אפשר מהר - אבל שווה לחכות",cls:"",ic:"gift",img:IMG+"1513885535751-8b9238bd345a"+Q},
-  {n:"ארוחת בוקר עם אופק / אלירן",p:4500,minTier:0,band:"מיוחד · הזמן היקר שלנו · 4-6 עיניים על העסק שלך",cls:"halo",ic:"coffee",img:IMG+"1521017432531-fbd92d768814"+Q},
-  {n:"אוזניות / רמקול נייד",p:3000,minTier:0,band:"קטן · ~1-2 ח'",cls:"",ic:"airpods",img:IMG+"1608043152269-423dbba4e7e1"+Q},
-  {n:"יום ספא זוגי מפנק",p:5000,minTier:0,band:"קטן · ~3-4 ח'",cls:"",ic:"spa",img:IMG+"1540555700478-4be289fbecef"+Q},
-  {n:"AirPods",p:8000,minTier:1,band:"כסף · ~5-6 ח'",cls:"",ic:"airpods",img:IMG+"1600294037681-c80b4cb5b434"+Q},
-  {n:'סופ"ש מלון בארץ (זוגי)',p:14000,minTier:1,band:"כסף · ~9-10 ח'",cls:"",ic:"hotel",img:IMG+"1566073771259-6a8506099945"+Q},
-  {n:"Apple Watch",p:16000,minTier:1,band:"כסף · ~1 שנה",cls:"",ic:"watch",img:IMG+"1434493789847-2f02dc6ca35d"+Q},
-  {n:"iPad",p:20000,minTier:2,band:"זהב · ~1-1.5 שנה",cls:"",ic:"ipad",img:IMG+"1544244015-0df4b3ffc6b0"+Q},
-  {n:"iPhone (בסיס)",p:28000,minTier:2,band:"זהב · ~1.5 שנה",cls:"",ic:"iphone",img:IMG+"1511707171634-5f897ff02aa9"+Q},
-  {n:"iPhone Pro",p:38000,minTier:2,band:"זהב · ~2 שנה",cls:"",ic:"iphone",img:IMG+"1592286927505-1def25115558"+Q},
-  {n:"MacBook Air",p:45000,minTier:3,band:"פלטינה · ~2 שנה",cls:"halo",ic:"mac",img:IMG+"1517336714731-489689fd1ca8"+Q},
-  {n:"טיסה זוגית לאירופה",p:55000,minTier:3,band:"פלטינה · ~2-2.5 שנה",cls:"halo",ic:"plane",img:IMG+"1436491865332-7a61a109cc05"+Q},
-  {n:'חופשה זוגית מפנקת בחו"ל',p:90000,minTier:3,band:"הילה · ~3-4 שנה",cls:"halo",ic:"beach",img:IMG+"1507525428034-b723cf961d3e"+Q},
-  {n:"השתתפות מימון רכב / טיול גדול",p:160000,minTier:3,band:"הילה · ~4-5 שנה",cls:"halo",ic:"car",img:IMG+"1503376780353-7e6692767b70"+Q}
+  {n:"ארוחת צהריים עסקית (יחיד)",p:800,c:75,minTier:0,band:"על החברה · פרס הכניסה - הכי מהיר להשיג",cls:"",ic:"coffee",img:IMG+"1504674900247-0877df9cc836"+Q},
+  {n:"שובר BuyMe / ארוחה זוגית",p:1500,c:200,minTier:0,band:"קטן · אפשר מהר - אבל שווה לחכות",cls:"",ic:"gift",img:IMG+"1513885535751-8b9238bd345a"+Q},
+  {n:"ארוחת בוקר עם אופק / אלירן",p:4500,c:150,minTier:0,band:"מיוחד · הזמן היקר שלנו · 4-6 עיניים על העסק שלך",cls:"halo",ic:"coffee",img:IMG+"1521017432531-fbd92d768814"+Q},
+  {n:"אוזניות / רמקול נייד",p:3000,c:350,minTier:0,band:"קטן · ~1-2 ח'",cls:"",ic:"airpods",img:IMG+"1608043152269-423dbba4e7e1"+Q},
+  {n:"יום ספא זוגי מפנק",p:5000,c:600,minTier:0,band:"קטן · ~3-4 ח'",cls:"",ic:"spa",img:IMG+"1540555700478-4be289fbecef"+Q},
+  {n:"AirPods",p:8000,c:900,minTier:1,band:"כסף · ~5-6 ח'",cls:"",ic:"airpods",img:IMG+"1600294037681-c80b4cb5b434"+Q},
+  {n:'סופ"ש מלון בארץ (זוגי)',p:14000,c:1200,minTier:1,band:"כסף · ~9-10 ח'",cls:"",ic:"hotel",img:IMG+"1566073771259-6a8506099945"+Q},
+  {n:"Apple Watch",p:16000,c:1700,minTier:1,band:"כסף · ~1 שנה",cls:"",ic:"watch",img:IMG+"1434493789847-2f02dc6ca35d"+Q},
+  {n:"iPad",p:20000,c:2200,minTier:2,band:"זהב · ~1-1.5 שנה",cls:"",ic:"ipad",img:IMG+"1544244015-0df4b3ffc6b0"+Q},
+  {n:"iPhone (בסיס)",p:28000,c:3700,minTier:2,band:"זהב · ~1.5 שנה",cls:"",ic:"iphone",img:IMG+"1511707171634-5f897ff02aa9"+Q},
+  {n:"iPhone Pro",p:38000,c:4800,minTier:2,band:"זהב · ~2 שנה",cls:"",ic:"iphone",img:IMG+"1592286927505-1def25115558"+Q},
+  {n:"MacBook Air",p:45000,c:4800,minTier:3,band:"פלטינה · ~2 שנה",cls:"halo",ic:"mac",img:IMG+"1517336714731-489689fd1ca8"+Q},
+  {n:"טיסה זוגית לאירופה",p:55000,c:6500,minTier:3,band:"פלטינה · ~2-2.5 שנה",cls:"halo",ic:"plane",img:IMG+"1436491865332-7a61a109cc05"+Q},
+  {n:'חופשה זוגית מפנקת בחו"ל',p:90000,c:10000,minTier:3,band:"הילה · ~3-4 שנה",cls:"halo",ic:"beach",img:IMG+"1507525428034-b723cf961d3e"+Q},
+  {n:"השתתפות מימון רכב / טיול גדול",p:160000,c:25000,minTier:3,band:"הילה · ~4-5 שנה",cls:"halo",ic:"car",img:IMG+"1503376780353-7e6692767b70"+Q}
 ];
 const TRIGGERS=[
   {k:"R_year",label:"🏅 שנה מלאה עם לקוח (שימור)",pts:1200,color:"#c9862a",vvs:true,note:"התגמול הגבוה ביותר במערכת. שנה של שימור = ההוכחה הכי חזקה לערך שלך, והכי שווה לחברה (ריטיינר חוזר). מדווחים כל שנה מחדש לכל לקוח - כל שנה נוספת (שנייה, שלישית...) מזכה שוב ב-1,200. מוכפל בדרגה.",ex:["לקוח שהשלים 12 חודשי ריטיינר רצופים בניהולך","חידוש לשנה שנייה/שלישית - כל שנה מזכה מחדש ב-1,200"]},
@@ -778,6 +778,7 @@ function renderAdmin(){const players=USERS.filter(u=>!u.admin),pend=pendingList(
       <div class="acts"><button class="ok" title="סופק" onclick="fulfillRedemp('${u.id}',${r.id})">✓ סופק</button><button class="no" title="דחה והחזר נקודות" onclick="denyRedemp('${u.id}',${r.id})">✗</button></div></div>`).join("")}</div>`
     :`<div class="card"><div class="muted">אין בקשות מימוש פתוחות. כשעובד מממש פרס - הבקשה תגיע לכאן לאספקה.</div></div>`}
   </div>
+  ${prizeDash()}
   ${(()=>{const cos=USERS.filter(u=>u.coach&&!u.admin&&u.overridePending>0);return cos.length?`<div class="sec"><div class="kick">שחרור אוברררייד למנהלי מחלקה (${cos.length})</div>
     <div class="note" style="font-size:12.5px;margin-bottom:8px">מנהל מחלקה צובר 15% מהצוות שלו כ"ממתין". אתה משחרר לארנק שלו אחרי סקירה - ככה המאשר לא מזכה את עצמו.</div>
     <div class="appr">${cos.map(co=>`<div class="row"><span class="av" style="background:${co.color}">${esc(initials(co.name))}</span><div class="info"><b>${esc(co.name)}</b> · מחלקה ${esc(co.dept)}<div class="d">⏳ ${nf(co.overridePending)} נק' אוברררייד ממתינים</div></div><div class="acts"><button class="ok" title="שחרר" onclick="releaseOverride('${co.id}')">✓ שחרר</button></div></div>`).join("")}</div></div>`:"";})()}
@@ -960,6 +961,28 @@ function redeem(pi){const u=state.me;if(!u||u.admin)return;const pz=PRIZES[pi];i
   (state.redemp[u.id]=state.redemp[u.id]||[]).push({id:newId(),rid:uid4(),name,cost,ts:Date.now(),status:"requested"});save();
   celebrate("🎁 בקשת מימוש נשלחה להנהלה! "+nf(cost)+" נק' ירדו מהארנק. הפרס בדרך אליך.");renderPrizes();}
 function redempList(){const out=[];USERS.forEach(u=>{if(u.admin)return;(state.redemp[u.id]||[]).forEach(r=>{if(r.status==="requested")out.push({u,r})})});return out;}
+function prizeDash(){const perPrize={},perUser={};let cnt=0,tPts=0,tIls=0,orderIls=0,doneIls=0,orderCnt=0;
+  USERS.forEach(u=>{if(u.admin)return;(state.redemp[u.id]||[]).forEach(r=>{if(r.status==="denied")return;
+    const pz=PRIZES.find(p=>p.n===r.name),ils=pz&&pz.c!=null?pz.c:Math.round((r.cost||0)*0.12),pp=pz?pz.p:(r.cost||0);
+    cnt++;tPts+=r.cost||0;tIls+=ils;if(r.status==="requested"){orderIls+=ils;orderCnt++;}else doneIls+=ils;
+    const P=perPrize[r.name]||(perPrize[r.name]={name:r.name,c:0,pts:0,ils:0,who:{},req:0});P.c++;P.pts+=r.cost||0;P.ils+=ils;P.who[u.name]=(P.who[u.name]||0)+1;if(r.status==="requested")P.req++;
+    const U=perUser[u.id]||(perUser[u.id]={name:u.name,color:u.color,c:0,pts:0,s:0,m:0,l:0});U.c++;U.pts+=r.cost||0;if(pp<8000)U.s++;else if(pp<30000)U.m++;else U.l++;
+  })});
+  if(!cnt)return `<div class="sec"><div class="kick">בקרת פרסים - מה מומש, מי, וכמה עולה לך 🎁</div><div class="card"><div class="muted">עדיין לא מומשו פרסים. ברגע שמישהו מממש - כאן תראה בדיוק מה מומש, מי מימש, מה טווח ההעדפה שלו, וכמה כסף להוציא כדי להזמין.</div></div></div>`;
+  const prizes=Object.values(perPrize).sort((a,b)=>b.c-a.c),users=Object.values(perUser).sort((a,b)=>b.pts-a.pts);
+  return `<div class="sec"><div class="kick">בקרת פרסים - מה מומש, מי, וכמה עולה לך 🎁</div>
+  <div class="grid g4" style="margin-bottom:12px">
+    <div class="stat"><div class="lab">סה"כ מימושים</div><div class="big">${cnt}</div></div>
+    <div class="stat"><div class="lab">נקודות שמומשו</div><div class="big">${nf(tPts)}</div></div>
+    <div class="stat"><div class="lab">💸 להזמין עכשיו</div><div class="big" style="color:var(--orange)">₪${nf(orderIls)}</div><div class="sub">${orderCnt} ממתינים להזמנה</div></div>
+    <div class="stat"><div class="lab">כבר סופק</div><div class="big">₪${nf(doneIls)}</div><div class="sub">עלות כוללת ~₪${nf(tIls)}</div></div>
+  </div>
+  <div class="tblwrap"><table class="lead"><thead><tr><th>פרס</th><th>כמה</th><th>מי מימש</th><th>נק'</th><th>₪ עלות</th></tr></thead><tbody>
+  ${prizes.map(p=>`<tr><td><b>${esc(p.name)}</b>${p.req?` <span class="hb pend">${p.req} להזמנה</span>`:""}</td><td style="text-align:center"><b>${p.c}</b></td><td style="font-size:11.5px">${Object.entries(p.who).map(([n,c])=>esc(n)+(c>1?" ×"+c:"")).join(" · ")}</td><td>${nf(p.pts)}</td><td><b>₪${nf(p.ils)}</b></td></tr>`).join("")}
+  </tbody></table></div>
+  <div class="kick" style="margin-top:16px">העדפת טווח לפי אדם - מי מממש מהר, מי חוסך לגדול</div>
+  <div class="appr">${users.map(u=>{const lean=u.l>u.s?"טווח ארוך 🎯 (חוסך לגדול)":u.s>u.l?"טווח קצר ⚡ (מממש מהר)":"מעורב";return `<div class="row"><span class="av" style="background:${u.color}">${esc(initials(u.name))}</span><div class="info"><b>${esc(u.name)}</b> · ${u.c} מימושים · ${nf(u.pts)} נק'<div class="d">${lean} · קצר ${u.s} / בינוני ${u.m} / ארוך ${u.l}</div></div></div>`}).join("")}</div>
+  </div>`;}
 function fulfillRedemp(uid,id){if(!state.me||!state.me.admin)return;const r=(state.redemp[uid]||[]).find(x=>x.id===id);if(r&&r.status==="requested"){r.status="fulfilled";save();celebrate("✓ סומן כסופק");renderAdmin();}}
 function denyRedemp(uid,id){if(!state.me||!state.me.admin)return;const u=USERS.find(x=>x.id===uid),r=(state.redemp[uid]||[]).find(x=>x.id===id);if(u&&r&&r.status==="requested"){r.status="denied";u.balance+=r.cost;save();celebrate("↩ הבקשה נדחתה, הנקודות הוחזרו");renderAdmin();}}
 function renderRedemp(u){const rs=(state.redemp[u.id]||[]).slice().reverse();
