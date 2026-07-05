@@ -488,10 +488,13 @@ async function enablePush(){if(!state.me){return;}if(!pushSupported()){alert("ה
   }catch(e){alert("שגיאה בהפעלת התראות: "+(e&&e.message||e));}}
 function sendPush(title,body){try{fetch(SUPA_URL+"/functions/v1/send-push",{method:"POST",headers:SB_H,body:JSON.stringify({title,body,url:"/"})}).catch(()=>{});}catch(e){}}
 let sbOnline=false,pushPending=false,pushTimer=null,pulling=false,curView="dash";
+function newId(){return Date.now()*1000+Math.floor(Math.random()*1000);}/* מזהה ייחודי-גלובלי לשורה - מונע התנגשות בין מכשירים */
+let _lastSig="";
+function stateSig(){let s=(state.me?state.me.id:"")+"|"+curView+"|";USERS.forEach(u=>{s+=u.id+","+(u.balance||0)+","+(u.career||0)+","+(u.stars||0)+","+(u.streak||0)+","+(u.refs||0)+","+u.target+","+(u.overridePending||0)+";";});s+="|L";const L=state.logs||{};Object.keys(L).forEach(k=>{const a=L[k]||[];s+=k+a.length+a.map(l=>(l.status||"?").charAt(0)+(l.pts||0)).join("")+";";});s+="|A"+((state.anns||[]).map(a=>a.id+(a.active?1:0)).join(","))+"|R";const D=state.redemp||{};Object.keys(D).forEach(k=>{s+=k+(D[k]||[]).map(r=>(r.status||"?").charAt(0)).join("");});s+="|C"+((state.cashLedger||[]).length);return s;}
 function sbGet(t){return fetch(SUPA_URL+"/rest/v1/"+t+"?select=*",{headers:SB_H}).then(r=>r.ok?r.json():Promise.reject(r.status));}
 function sbUp(t,rows){return rows.length?fetch(SUPA_URL+"/rest/v1/"+t,{method:"POST",headers:Object.assign({},SB_H,{"Prefer":"resolution=merge-duplicates,return=minimal"}),body:JSON.stringify(rows)}).then(r=>{if(!r.ok)throw r.status}):Promise.resolve();}
 function stateRows(){const users=USERS.map(u=>({id:u.id,data:u}));const logs=[];Object.keys(state.logs||{}).forEach(uid=>(state.logs[uid]||[]).forEach(l=>logs.push({id:l.id,data:Object.assign({},l,{user_id:uid})})));const reds=[];Object.keys(state.redemp||{}).forEach(uid=>(state.redemp[uid]||[]).forEach(r=>reds.push({id:r.id,data:Object.assign({},r,{user_id:uid})})));const cash=(state.cashLedger||[]).map(r=>({id:r.id,data:r}));const anns=(state.anns||[]).map(a=>({id:a.id,data:a}));return{users,logs,reds,cash,anns};}
-async function pushRemote(){const R=stateRows();try{await Promise.all([sbUp("users",R.users),sbUp("logs",R.logs),sbUp("redemptions",R.reds),sbUp("cash_ledger",R.cash),sbUp("announcements",R.anns),sbUp("meta",[{k:"seq",v:state.seq}])]);sbOnline=true;}catch(e){}pushPending=false;}
+async function pushRemote(){const R=stateRows();try{await Promise.all([sbUp("users",R.users),sbUp("logs",R.logs),sbUp("redemptions",R.reds),sbUp("cash_ledger",R.cash),sbUp("announcements",R.anns),sbUp("meta",[{k:"seq",v:state.seq}])]);sbOnline=true;pushPending=false;}catch(e){sbOnline=false;pushPending=true;clearTimeout(pushTimer);pushTimer=setTimeout(pushRemote,3000);/* שמירה נכשלה - שומר על השינוי המקומי ומנסה שוב, לא נותן ל-pull לדרוס */}}
 function schedulePush(){pushPending=true;clearTimeout(pushTimer);pushTimer=setTimeout(pushRemote,350);}
 function mergeRows(u,lg,rd,ch,an,mseq){USERS=SEED.map((s,i)=>Object.assign({},s,{color:AV[i%AV.length]}));u.map(r=>r.data).forEach(su=>{const ex=USERS.find(x=>x.id===su.id);if(ex)Object.assign(ex,su);else USERS.push(su);});
   const lb={};lg.forEach(r=>lb[r.id]=Object.assign({},r.data));Object.keys(state.logs||{}).forEach(uid=>(state.logs[uid]||[]).forEach(l=>{if(!lb[l.id])lb[l.id]=Object.assign({},l,{user_id:uid})}));const nl={};Object.values(lb).forEach(l=>{(nl[l.user_id]=nl[l.user_id]||[]).push(l)});Object.keys(nl).forEach(k=>nl[k].sort((a,b)=>a.id-b.id));state.logs=nl;
@@ -503,7 +506,8 @@ function mergeRows(u,lg,rd,ch,an,mseq){USERS=SEED.map((s,i)=>Object.assign({},s,
 async function pullRemote(reRender){if(pulling||pushPending)return false;pulling=true;try{const a=await Promise.all([sbGet("users"),sbGet("logs"),sbGet("redemptions"),sbGet("cash_ledger"),sbGet("meta"),sbGet("announcements")]);sbOnline=true;if(!a[0].length){pulling=false;await pushRemote();return true;}mergeRows(a[0],a[1],a[2],a[3],a[5],(a[4].find(x=>x.k==="seq")||{}).v||0);saveLocal();updateBell();if(reRender)refreshView();maybeAnnounce();return true;}catch(e){sbOnline=false;return false;}finally{pulling=false;}}
 function refreshView(){if($("#modal").classList.contains("show"))return;if(!state.me||$("#app").style.display==="none"){if($("#login")&&$("#login").style.display!=="none")try{renderLogin()}catch(e){};return;}if(curView==="log")return;/* לא לשבש טופס תיעוד פתוח */
   const _ae=document.activeElement;if(_ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(_ae.tagName))return;/* אל תבנה מחדש בזמן הקלדה */
-  const _at=$("#annTitle"),_ab=$("#annBody"),_gr=$("#gbReason");if((_at&&_at.value.trim())||(_ab&&_ab.value.trim())||(_gr&&_gr.value.trim()))return;/* אל תמחק טופס אדמין באמצע מילוי */
+  const _dv=$("#v-"+curView);if(_dv){const _ins=_dv.querySelectorAll("textarea,input");for(let _i=0;_i<_ins.length;_i++){const _e=_ins[_i];if(_e.id==="annIcon"||_e.type==="checkbox"||_e.type==="radio")continue;if((_e.value||"").trim())return;}}/* אל תמחק שום טופס פתוח באמצע מילוי (אדמין/מנהל-מחלקה/כל טופס) */
+  const _sig=stateSig();if(_sig===_lastSig)return;_lastSig=_sig;/* אל תבנה מחדש כשכלום לא השתנה - מונע קפיצות ורענון מיותר כל 8 שניות */
   try{({dash:renderDash,board:renderBoard,prizes:renderPrizes,rules:renderRules})[curView]();}catch(e){}}
 function exportData(){const blob=localStorage.getItem("ascend7")||"{}";const a=document.createElement("a");a.href="data:application/json;charset=utf-8,"+encodeURIComponent(blob);a.download="pisga-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();}
 function importData(ev){const f=ev.target.files&&ev.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);if(!o||!o.users)throw 0;if(!confirm("לשחזר את הגיבוי? הפעולה תדרוס את הנתונים במכשיר הזה."))return;localStorage.setItem("ascend7",rd.result);localStorage.setItem("ascend7_bak",rd.result);location.reload();}catch(e){alert("קובץ גיבוי לא תקין.");}};rd.readAsText(f);}
@@ -612,19 +616,19 @@ function updateBell(){const b=$("#navBell"),bg=$("#bellBadge");if(!b)return;if(!
 function openBell(){const list=activeAnns();if(state.me)localStorage.setItem("annSeen_"+state.me.id,list.length?list[0].id:0);updateBell();
   $("#modalBody").innerHTML=`<div class="mm">🔔</div><h3>התראות ועדכונים</h3>`+(pushSupported()&&!pushOn()?`<div style="background:#eef8fb;border:1px solid #bfe4ec;border-radius:12px;padding:10px 12px;margin:8px 0;text-align:right"><div style="font-weight:800;font-size:13px">📱 רוצה לקבל התראות לטלפון גם כשהאפליקציה סגורה?</div><button class="btn" style="margin-top:8px;max-width:220px" onclick="enablePush()">🔔 הפעל התראות לטלפון</button><div class="muted" style="font-size:11px;margin-top:5px">ב-iPhone: קודם הוסף למסך הבית ופתח משם.</div></div>`:pushOn()?`<div class="muted" style="font-size:12px;margin:6px 0">✅ התראות לטלפון פעילות.</div>`:"")+(list.length?`<div style="text-align:right;max-height:60vh;overflow:auto;margin-top:8px">${list.map(a=>`<div style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#f7fafd"><div style="font-weight:900;font-size:15px;color:var(--ink)">${a.icon||"📣"} ${esc(a.title||"")}</div><div style="font-size:13.5px;color:var(--ink2);line-height:1.6;margin-top:5px">${esc(a.body||"")}</div>${a.cta?`<div style="margin-top:6px;font-size:12.5px;font-weight:800;color:var(--teal)">${esc(a.cta)}</div>`:""}${(a.claimable&&a.pts>0&&state.me&&!state.me.admin&&!state.me.coach)?(annClaimed(a.id)?`<div style="margin-top:8px;font-size:12.5px;font-weight:800;color:#c9862a">✅ דיווחת · ${nf(a.pts)} נק' ממתינות לאישור</div>`:`<button class="btn" style="margin-top:8px;max-width:220px;background:#25b877" onclick="claimAnnouncement(${a.id})">✅ ביצעתי · +${nf(a.pts)} נק'</button>`):""}<div class="muted" style="font-size:11px;margin-top:6px">${fmtDate(a.ts)}</div></div>`).join("")}</div>`:`<div class="sub">אין התראות כרגע. כשיהיה אירוע או הזדמנות מיוחדת - זה יופיע כאן.</div>`)+`<button class="skip" onclick="closeModal()">סגור</button>`;
   $("#modal").classList.add("show");}
-function maybeAnnounce(){const u=state.me;if(!u||u.admin)return;if($("#modal").classList.contains("show"))return;const list=activeAnns();if(!list.length)return;const top=list[0];const shown=+localStorage.getItem("annPopup_"+u.id)||0;if(top.id<=shown)return;localStorage.setItem("annPopup_"+u.id,top.id);
+function maybeAnnounce(){const u=state.me;if(!u||u.admin)return;if($("#modal").classList.contains("show"))return;const _ae=document.activeElement;if(_ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(_ae.tagName))return;if(curView==="log")return;const list=activeAnns();if(!list.length)return;const top=list[0];const shown=+localStorage.getItem("annPopup_"+u.id)||0;if(top.id<=shown)return;localStorage.setItem("annPopup_"+u.id,top.id);
   const canClaim=top.claimable&&top.pts>0&&!u.coach&&!annClaimed(top.id);
   $("#modalBody").innerHTML=`<div class="mm">${top.icon||"📣"}</div><h3>${esc(top.title||"התראה חדשה")}</h3><div class="sub">${esc(top.body||"")}</div>${top.cta?`<div style="font-size:13px;font-weight:800;color:var(--teal);margin-top:6px">${esc(top.cta)}</div>`:""}${canClaim?`<button class="btn" style="max-width:250px;margin:12px auto 0;background:#25b877" onclick="claimAnnouncement(${top.id})">✅ ביצעתי · +${nf(top.pts)} נק' (לאישור)</button><button class="skip" onclick="closeModal()">אחר כך</button>`:`<button class="btn" style="max-width:230px;margin:10px auto 0" onclick="closeModal()">מגניב! 🚀</button><button class="skip" onclick="closeModal();openBell()">כל ההתראות</button>`}`;
   $("#modal").classList.add("show");}
 function createAnnouncement(){if(!state.me||!state.me.admin)return;const title=($("#annTitle").value||"").trim();const body=($("#annBody").value||"").trim();const cta=($("#annCta").value||"").trim();const icon=($("#annIcon").value||"📣").trim();const claimable=$("#annClaim")&&$("#annClaim").checked;const pts=Math.round(+(($("#annPts")&&$("#annPts").value)||0));if(!title||!body){$("#annErr").style.display="block";return;}
-  (state.anns=state.anns||[]).unshift({id:++state.seq,title,body,cta,icon,claimable:!!claimable,pts:pts>0?pts:0,ts:Date.now(),by:state.me.id,active:true});save();sendPush(icon+" "+title,body+(claimable&&pts>0?" · "+pts+" נק' על 'ביצעתי'":""));celebrate("📣 ההתראה נשלחה לכולם! (גם כ-push למי שהפעיל)");renderAdmin();}
+  (state.anns=state.anns||[]).unshift({id:newId(),title,body,cta,icon,claimable:!!claimable,pts:pts>0?pts:0,ts:Date.now(),by:state.me.id,active:true});save();sendPush(icon+" "+title,body+(claimable&&pts>0?" · "+pts+" נק' על 'ביצעתי'":""));celebrate("📣 ההתראה נשלחה לכולם! (גם כ-push למי שהפעיל)");renderAdmin();}
 function annClaimed(annId){return state.me&&(state.logs[state.me.id]||[]).some(l=>l.annId===annId);}
 function claimAnnouncement(annId){const u=state.me;if(!u||u.admin||u.coach)return;const a=(state.anns||[]).find(x=>x.id===annId);if(!a||!a.claimable||!(a.pts>0))return;if(annClaimed(annId)){celebrate("כבר דיווחת על ההזדמנות הזו 👍");closeModal();return;}
-  (state.logs[u.id]=state.logs[u.id]||[]).push({id:++state.seq,type:"CLAIM",annId:annId,short:"✅ "+a.title,pts:a.pts,vvs:true,client:"הזדמנות: "+a.title,details:a.body||"",val:"",color:"#9a6ff0",status:"pending",ts:Date.now(),tierAt:userTier(u).n,addedRefs:0,addedStreak:0,addedStars:0});
+  (state.logs[u.id]=state.logs[u.id]||[]).push({id:newId(),type:"CLAIM",annId:annId,short:"✅ "+a.title,pts:a.pts,vvs:true,client:"הזדמנות: "+a.title,details:a.body||"",val:"",color:"#9a6ff0",status:"pending",ts:Date.now(),tierAt:userTier(u).n,addedRefs:0,addedStreak:0,addedStars:0});
   save();closeModal();celebrate("✅ נשלח לאישור · +"+nf(a.pts)+" נק' (ממתין)");}
 function delAnnouncement(id){if(!state.me||!state.me.admin)return;const a=(state.anns||[]).find(x=>x.id===id);if(a){a.active=false;save();renderAdmin();}}
 function grantBonus(){if(!state.me||!state.me.admin)return;const uid=$("#gbUser").value;const pts=Math.round(+($("#gbPts").value||0));const reason=($("#gbReason").value||"").trim();const u=USERS.find(x=>x.id===uid);if(!u||!pts||pts<=0||!reason){$("#gbErr").style.display="block";return;}
-  const l={id:++state.seq,type:"BONUS",short:"🎁 בונוס מיוחד",pts,vvs:true,client:"בונוס הנהלה",details:reason,val:"",color:"#9a6ff0",status:"approved",ts:Date.now(),tierAt:userTier(u).n,addedRefs:0,addedStreak:0,addedStars:0,approvedBy:state.me.id,approvedAt:Date.now()};
+  const l={id:newId(),type:"BONUS",short:"🎁 בונוס מיוחד",pts,vvs:true,client:"בונוס הנהלה",details:reason,val:"",color:"#9a6ff0",status:"approved",ts:Date.now(),tierAt:userTier(u).n,addedRefs:0,addedStreak:0,addedStars:0,approvedBy:state.me.id,approvedAt:Date.now()};
   (state.logs[u.id]=state.logs[u.id]||[]).push(l);u.balance+=pts;u.career+=pts;save();celebrate("🎁 "+nf(pts)+" נק' בונוס ל"+u.name);renderAdmin();}
 
 document.querySelectorAll(".nav .tab").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
@@ -696,7 +700,7 @@ function fmtDate(ts){if(!ts)return"";const d=new Date(ts);return d.getDate()+"/"
 function stBadge(s){return s==="approved"?'<span class="hb ok">✓ אושר</span>':s==="rejected"?'<span class="hb no">✗ נדחה</span>':'<span class="hb pend">⏳ ממתין</span>';}
 function renderMyFeed(){const logs=(state.logs[state.me.id]||[]).slice().reverse().slice(0,6),c=$("#myfeed");
   if(!logs.length){c.innerHTML=`<div class="muted" style="font-size:13px">עדיין לא תיעדת הישגים. כל הישג עובר לאישור אופק ואז מעלה אותך במסע.</div>`;return}
-  c.innerHTML=`<div class="feed">${logs.map(l=>{const b=l.status==="approved"?'<span class="badge ok">✓</span>':l.status==="rejected"?'<span class="badge no">✗ נדחה</span>':'<span class="badge">⏳ ממתין</span>';return `<div class="row"><span class="dot" style="background:${l.color}"></span>${l.short} ${l.client?`· ${esc(l.client)}`:""} ${b}<span class="pts">+${nf(l.pts)}</span></div>`}).join("")}</div>`;}
+  c.innerHTML=`<div class="feed">${logs.map(l=>{const b=l.status==="approved"?'<span class="badge ok">✓</span>':l.status==="rejected"?'<span class="badge no">✗ נדחה</span>':'<span class="badge">⏳ ממתין</span>';return `<div class="row"><span class="dot" style="background:${l.color}"></span>${esc(l.short)} ${l.client?`· ${esc(l.client)}`:""} ${b}<span class="pts">+${nf(l.pts)}</span></div>`}).join("")}</div>`;}
 function renderHistory(u){const logs=state.logs[u.id]||[],total=logs.length;
   if(!total)return `<div class="muted" style="font-size:13px">עדיין אין הישגים בהיסטוריה. תעד את הראשון - הכל יישמר כאן ולא ניתן למחוק.</div>`;
   const appr=logs.filter(l=>l.status==="approved").reduce((a,b)=>a+b.pts,0),pend=logs.filter(l=>l.status==="pending").length,rej=logs.filter(l=>l.status==="rejected").length;
@@ -717,7 +721,7 @@ function pendingList(){const out=[];USERS.forEach(u=>{if(u.admin)return;(state.l
 function recentDecisions(){const out=[];USERS.forEach(u=>{if(u.admin)return;(state.logs[u.id]||[]).forEach(l=>{if((l.status==="approved"||l.status==="rejected")&&l.approvedBy)out.push({u,l})})});return out.sort((a,b)=>(b.l.approvedAt||0)-(a.l.approvedAt||0));}
 function whoName(id){const x=USERS.find(u=>u.id===id);return x?x.name:id;}
 function submitCoachLog(){const u=state.me;if(!u||!u.coach)return;const t=COACH_TRIGGERS.find(x=>x.k===$("#clType").value);if(!t)return;const details=($("#clDetails").value||"").trim();if(!details){$("#clErr").style.display="block";return;}
-  (state.logs[u.id]=state.logs[u.id]||[]).push({id:++state.seq,type:t.k,short:t.label,pts:t.pts,vvs:true,client:"מחלקה "+u.dept,details,val:"",color:"#c9862a",status:"pending",ts:Date.now(),tierAt:"מעגל פנימי",addedRefs:0,addedStreak:0,addedStars:0,coachLog:1});
+  (state.logs[u.id]=state.logs[u.id]||[]).push({id:newId(),type:t.k,short:t.label,pts:t.pts,vvs:true,client:"מחלקה "+u.dept,details,val:"",color:"#c9862a",status:"pending",ts:Date.now(),tierAt:"מעגל פנימי",addedRefs:0,addedStreak:0,addedStars:0,coachLog:1});
   save();celebrate("🔥 נשלח לאישור אופק · +"+nf(t.pts)+" נק' (ממתין)");renderCoach();}
 function renderAdmin(){const players=USERS.filter(u=>!u.admin),pend=pendingList(),rq=redempList();
   $("#v-dash").innerHTML=`<div class="sec"><div class="kick">מסך אדמין - אופק</div><h1>אישורים ומבט-על</h1>
@@ -761,7 +765,7 @@ function renderAdmin(){const players=USERS.filter(u=>!u.admin),pend=pendingList(
     ${rows.some(r=>daysSince(r.last)>=14||r.last===0)?`<div class="note" style="margin-top:8px;font-size:12.5px;background:#fff4f4;border-color:#f3c0c0">🔴 יש מנהלים שלא תיעדו מזמן - שווה תזכורת/שיחה כדי לא לאבד אותם.</div>`:""}</div>`;})()}
   <div class="sec"><div class="kick">תור אישורים ${pend.length?`(${pend.length})`:""}</div>
     ${pend.length?`<div class="appr">${pend.map(({u,l})=>`<div class="row"><span class="av" style="background:${u.color}">${esc(initials(u.name))}</span>
-      <div class="info"><b>${esc(u.name)}</b> · ${l.short}<div class="d">${esc(l.client||"בלי פרטים")}${l.details?" · "+esc(l.details):""}${l.val?" · "+esc(l.val)+" ₪":""}</div></div>
+      <div class="info"><b>${esc(u.name)}</b> · ${esc(l.short)}<div class="d">${esc(l.client||"בלי פרטים")}${l.details?" · "+esc(l.details):""}${l.val?" · "+esc(l.val)+" ₪":""}</div></div>
       <span class="pts">+${nf(l.pts)}</span><div class="acts"><button class="ok" title="אשר" onclick="approveLog('${u.id}',${l.id})">✓</button><button class="no" title="דחה" onclick="rejectLog('${u.id}',${l.id})">✗</button></div></div>`).join("")}</div>`
     :`<div class="card"><div class="muted">אין הישגים שממתינים לאישור. הכל מעודכן. 👌</div></div>`}
   </div>
@@ -791,7 +795,7 @@ function approveLog(uid,id){const u=USERS.find(x=>x.id===uid),l=(state.logs[uid]
   /* אוברררייד למנהל המחלקה נצבר כ"ממתין" ומשוחרר רק ע"י אופק - מבטל ניגוד עניינים (המאשר אינו מזכה את עצמו) */
   if(!u.coach&&!u.admin){const co=USERS.find(x=>x.coach&&!x.admin&&x.dept===u.dept);if(co){co.overridePending=(co.overridePending||0)+Math.round(l.pts*OVERRIDE);}}
   /* ספר התחייבויות מזומן - נרשם אוטומטית על טריגר עם בונוס מזומן */
-  const t=TRIGGERS.find(x=>x.k===l.type);if(t&&t.cash){(state.cashLedger=state.cashLedger||[]).push({id:++state.seq,rid:uid4(),trigger:l.type,short:l.short,amount:t.cash,cashto:t.cashto,forClient:l.client,byUser:u.id,approvedBy:state.me.id,ts:Date.now(),status:"pending_payout"});}
+  const t=TRIGGERS.find(x=>x.k===l.type);if(t&&t.cash){(state.cashLedger=state.cashLedger||[]).push({id:newId(),rid:uid4(),trigger:l.type,short:l.short,amount:t.cash,cashto:t.cashto,forClient:l.client,byUser:u.id,approvedBy:state.me.id,ts:Date.now(),status:"pending_payout"});}
   save();celebrate("✓ אושר · "+nf(l.pts)+" נק' נכנסו לארנק");refreshApprovals();}
 function releaseOverride(coachId){if(!state.me||!state.me.admin)return;const co=USERS.find(x=>x.id===coachId);if(!co||!(co.overridePending>0))return;const ov=co.overridePending;co.balance+=ov;co.career+=ov;co.overrideEarned=(co.overrideEarned||0)+ov;co.overridePending=0;save();celebrate("✓ שוחרר אוברררייד "+nf(ov)+" נק' ל"+co.name);renderAdmin();}
 function markCashPaid(rid){if(!state.me||!state.me.admin)return;const r=(state.cashLedger||[]).find(x=>x.rid===rid);if(r&&r.status==="pending_payout"){r.status="paid";r.paidBy=state.me.id;r.paidAt=Date.now();save();renderAdmin();}}
@@ -803,7 +807,7 @@ function renderCoach(){const c=state.me,tp=teamPending(c.dept),team=USERS.filter
   <div class="note">אתה מסנן ומאשר את ההישגים של הצוות שלך (${team.map(t=>esc(t.name)).join(" · ")}). אישור מכניס את הנקודות לארנק של העובד; אופק רואה הכל מעליך.</div>
   <div class="sec"><div class="kick">תור אישורים - הצוות שלי ${tp.length?`(${tp.length})`:""}</div>
     ${tp.length?`<div class="appr">${tp.map(({u,l})=>`<div class="row"><span class="av" style="background:${u.color}">${esc(initials(u.name))}</span>
-      <div class="info"><b>${esc(u.name)}</b> · ${l.short}<div class="d">${esc(l.client||"בלי פרטים")}${l.details?" · "+esc(l.details):""}${l.val?" · "+esc(l.val)+" ₪":""}</div></div>
+      <div class="info"><b>${esc(u.name)}</b> · ${esc(l.short)}<div class="d">${esc(l.client||"בלי פרטים")}${l.details?" · "+esc(l.details):""}${l.val?" · "+esc(l.val)+" ₪":""}</div></div>
       <span class="pts">+${nf(l.pts)}</span><div class="acts"><button class="ok" title="אשר" onclick="approveLog('${u.id}',${l.id})">✓</button><button class="no" title="דחה" onclick="rejectLog('${u.id}',${l.id})">✗</button></div></div>`).join("")}</div>`
     :`<div class="card"><div class="muted">אין הישגים שממתינים לאישור בצוות שלך. 👌</div></div>`}
   </div>
@@ -847,7 +851,7 @@ function lgPreview(){const u=state.me,t=TRIGGERS.find(x=>x.k==$("#lgType").value
 function submitLog(){const u=state.me;if(!u||u.admin||u.coach)return;const t=TRIGGERS.find(x=>x.k==$("#lgType").value),client=$("#lgClient").value.trim(),details=$("#lgDetails").value.trim(),val=$("#lgVal").value.trim(),m=t.vvs?tierOf(u.career).mult:1,g=Math.round(t.pts*m);
   if(!client||!details){$("#lgErr").style.display="block";return;}
   const aR=t.k==="B_ref"?1:0,aS=(t.k==="A"||t.k==="A_p90"||t.k==="B_case")?1:0,aStars=t.k==="B_case"?1:0;
-  (state.logs[u.id]=state.logs[u.id]||[]).push({id:++state.seq,type:t.k,short:t.label.split(" (")[0],pts:g,vvs:t.vvs,client,details,val,color:t.color,status:"pending",ts:Date.now(),tierAt:userTier(u).n,addedRefs:aR,addedStreak:aS,addedStars:aStars});
+  (state.logs[u.id]=state.logs[u.id]||[]).push({id:newId(),type:t.k,short:t.label.split(" (")[0],pts:g,vvs:t.vvs,client,details,val,color:t.color,status:"pending",ts:Date.now(),tierAt:userTier(u).n,addedRefs:aR,addedStreak:aS,addedStars:aStars});
   save();/* כלום לא נספר עד אישור - לא ארנק ולא VVS/דרגה/תחרות. מוצג כ"ממתין". */
   celebrate(t.k==="B_case"?"⭐ נשלח לאישור - כוכב בדרך!":t.k==="B_ref"?"🌱 הפניה נשלחה לאישור":"🔥 נשלח לאישור · +"+nf(g)+" נק' (ממתין)");switchView("dash");}
 
@@ -869,7 +873,7 @@ function maybeTempt(){const u=state.me;if(!u||u.admin||u.coach)return;const smal
     <button class="skip" onclick="closeModal()">אחליט אחר כך</button>`;
   $("#modal").classList.add("show");}
 function closeModal(){$("#modal").classList.remove("show");}
-function temptRedeem(cost,name){closeModal();const u=state.me;if(!u||u.admin)return;syncFromStorage(u);if(u.balance>=cost){u.balance-=cost;(state.redemp[u.id]=state.redemp[u.id]||[]).push({id:++state.seq,rid:uid4(),name,cost,ts:Date.now(),status:"requested"});save();celebrate("🎁 בקשת מימוש נשלחה! בפעם הבאה אולי תחכה לגדול 😉");$("#v-prizes").classList.contains("hidden")?renderDash():renderPrizes();}}
+function temptRedeem(cost,name){closeModal();const u=state.me;if(!u||u.admin)return;syncFromStorage(u);if(u.balance>=cost){u.balance-=cost;(state.redemp[u.id]=state.redemp[u.id]||[]).push({id:newId(),rid:uid4(),name,cost,ts:Date.now(),status:"requested"});save();celebrate("🎁 בקשת מימוש נשלחה! בפעם הבאה אולי תחכה לגדול 😉");$("#v-prizes").classList.contains("hidden")?renderDash():renderPrizes();}}
 function temptWait(){closeModal();celebrate("💪 כבוד! סבלנות משתלמת - אתה בדרך לפסגה");}
 
 let boardFilter="all";
@@ -947,13 +951,13 @@ function cashOut(){const u=state.me;if(!u||u.admin)return;if(u.balance<=0)return
   const c0=Math.round(ils(u.balance)*CASH_KEEP);
   if(!confirm("להמיר "+nf(u.balance)+" נק' ל-₪"+nf(c0)+" במזומן?\nמנוכה 35% - פרס שווה לך הרבה יותר!"))return;
   syncFromStorage(u);if(u.balance<=0)return;const b=u.balance,c=Math.round(ils(b)*CASH_KEEP);u.balance=0;
-  (state.redemp[u.id]=state.redemp[u.id]||[]).push({id:++state.seq,rid:uid4(),name:"המרה לכסף ₪"+nf(c)+" (ניכוי 35%)",cost:b,cash:c,ts:Date.now(),status:"requested"});save();
+  (state.redemp[u.id]=state.redemp[u.id]||[]).push({id:newId(),rid:uid4(),name:"המרה לכסף ₪"+nf(c)+" (ניכוי 35%)",cost:b,cash:c,ts:Date.now(),status:"requested"});save();
   celebrate("💵 בקשת המרה לכסף נשלחה: ₪"+nf(c)+" (הפסדת 35% - פרס היה שווה יותר)");renderPrizes();}
 function setTarget(pi){const u=state.me;if(!u||u.admin)return;u.target=(u.target===pi?undefined:pi);save();celebrate(u.target===pi?"🎯 "+PRIZES[pi].n+" נקבע כיעד שלך!":"היעד הוסר");renderPrizes();}
 function redeem(pi){const u=state.me;if(!u||u.admin)return;const pz=PRIZES[pi];if(!pz)return;const cost=pz.p,name=pz.n;
   syncFromStorage(u);/* מגן מפני מימוש כפול מטאב ישן - קוראים את היתרה העדכנית מהאחסון */
   if(u.balance<cost)return;u.balance-=cost;
-  (state.redemp[u.id]=state.redemp[u.id]||[]).push({id:++state.seq,rid:uid4(),name,cost,ts:Date.now(),status:"requested"});save();
+  (state.redemp[u.id]=state.redemp[u.id]||[]).push({id:newId(),rid:uid4(),name,cost,ts:Date.now(),status:"requested"});save();
   celebrate("🎁 בקשת מימוש נשלחה להנהלה! "+nf(cost)+" נק' ירדו מהארנק. הפרס בדרך אליך.");renderPrizes();}
 function redempList(){const out=[];USERS.forEach(u=>{if(u.admin)return;(state.redemp[u.id]||[]).forEach(r=>{if(r.status==="requested")out.push({u,r})})});return out;}
 function fulfillRedemp(uid,id){if(!state.me||!state.me.admin)return;const r=(state.redemp[uid]||[]).find(x=>x.id===id);if(r&&r.status==="requested"){r.status="fulfilled";save();celebrate("✓ סומן כסופק");renderAdmin();}}
