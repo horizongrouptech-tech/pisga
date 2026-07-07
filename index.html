@@ -552,7 +552,7 @@ let USERS=[];
   pullRemote(true);setInterval(()=>pullRemote(true),8000);/* Supabase: משיכה ראשונית + סנכרון כל 8 שניות */
   renderTicker();
   const qp=new URLSearchParams(location.search).get("u");if(qp){const qu=USERS.find(x=>x.id===qp);if(qu)return enter(qu);}
-  if(saved.me){const u=USERS.find(x=>x.id===saved.me);if(u)return enter(u)}renderLogin();showSplash();})();
+  if(saved.me){const u=USERS.find(x=>x.id===saved.me);if(u)return enter(u)}$("#login").style.display="none";showSplash();})();
 
 function addUser(){
   const name=(prompt("שם מנהל הכספים החדש:")||"").trim().replace(/[<>"'`]/g,"").slice(0,40);
@@ -564,7 +564,23 @@ function addUser(){
   save();renderLogin();
   alert(name+" נוסף/ה למחלקה "+dept+" · מתחיל/ה מ-0 נקודות. הקישור האישי: ?u="+id);
 }
-function dismissSplash(){const s=$("#splash");if(s){s.classList.add("hide");setTimeout(()=>{s.style.display="none"},520);}}
+/* ===== שער כניסה רב-ארגוני (בחר ארגון -> קוד) - מונחה דאטה, הוספת ארגון = שורה ===== */
+const ORGS=[
+  {name:"Horizon Group",code:"Horizon100925",active:true},
+  {name:"Meridian Capital Partners",active:false},
+  {name:"Vertex Financial Group",active:false},
+  {name:"Northgate Advisory",active:false},
+  {name:"Ironwood Business Solutions",active:false},
+  {name:"Crestline Partners",active:false}
+];
+let _gating=false;
+function startGate(){if(localStorage.getItem("orgOk")==="1"){renderLogin();return;}_gating=true;chooseOrg();}
+function chooseOrg(){$("#modalBody").innerHTML=`<div class="mm">🏢</div><h3>בחר ארגון</h3><div class="sub">הפלטפורמה של מועדון הפסגה. בחר את הארגון שלך כדי להיכנס.</div><div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">${ORGS.map((o,i)=>`<button onclick="pickOrg(${i})" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-radius:12px;border:1.5px solid ${o.active?'#e0b53f':'var(--line)'};background:${o.active?'linear-gradient(135deg,#fffdf6,#fff6e0)':'#f7f9fc'};font-family:inherit;font-weight:800;font-size:14.5px;color:${o.active?'var(--ink)':'var(--muted)'};cursor:pointer">‏<span dir="ltr">${o.active?'⭐ ':''}${esc(o.name)}</span><span style="font-size:11.5px;color:${o.active?'var(--gold)':'var(--muted)'}">${o.active?'כניסה ←':'בקרוב'}</span></button>`).join("")}</div>`;$("#modal").classList.add("show");}
+function pickOrg(i){const o=ORGS[i];if(!o)return;if(!o.active){celebrate("🔒 "+o.name+" - בקרוב. הפלטפורמה נפתחת לארגונים נוספים.",1);return;}if(o.code){orgCodeScreen(i);}else{orgIn();}}
+function orgCodeScreen(i){const o=ORGS[i];$("#modalBody").innerHTML=`<div class="mm">🔒</div><h3 dir="ltr">${esc(o.name)}</h3><div class="sub">הזן את קוד ההתחברות למועדון:</div><input id="orgCode" type="text" autocomplete="off" autocapitalize="off" placeholder="קוד גישה" style="width:100%;margin-top:12px;padding:12px;border:1.5px solid var(--line);border-radius:12px;font:inherit;font-size:16px;text-align:center;letter-spacing:1px"><div id="orgCodeErr" style="display:none;color:var(--red);font-size:13px;font-weight:700;margin-top:6px">קוד שגוי, נסה שוב</div><button class="btn" style="max-width:230px;margin:12px auto 0" onclick="checkOrgCode(${i})">כניסה ←</button><button class="skip" onclick="chooseOrg()">← לרשימת הארגונים</button>`;$("#modal").classList.add("show");setTimeout(()=>{const e=$("#orgCode");if(e){e.focus();e.onkeydown=(ev)=>{if(ev.key==="Enter")checkOrgCode(i);};}},60);}
+function checkOrgCode(i){const o=ORGS[i],v=($("#orgCode").value||"").trim();if(v===o.code){localStorage.setItem("orgOk","1");orgIn();}else{const er=$("#orgCodeErr");if(er)er.style.display="block";const e=$("#orgCode");if(e){e.value="";e.focus();}}}
+function orgIn(){_gating=false;$("#modal").classList.remove("show");renderLogin();}
+function dismissSplash(){const s=$("#splash");if(s){s.classList.add("hide");setTimeout(()=>{s.style.display="none";startGate();},520);}}
 function showSplash(){const s=$("#splash");if(s){s.style.display="flex";s.classList.remove("hide");}}
 function renderLogin(){$("#nav").style.display="none";$("#app").style.display="none";$("#login").style.display="block";
   $("#userGrid").innerHTML=USERS.filter(u=>!u.admin).map(u=>{const t=userTier(u);
@@ -606,7 +622,7 @@ function showPin(){$("#modalBody").innerHTML=`<div class="mm">🔒</div><h3>כנ
 function adminGate(){pendingAdmin="__pick__";showPin();}
 function checkPin(){const v=($("#pinInput").value||"").trim();const need=(pendingAdmin&&pendingAdmin!=="__pick__"&&pendingAdmin.coach&&!pendingAdmin.admin)?COACH_PIN:ADMIN_PIN;if(v===need){if(pendingAdmin==="__pick__"){adminPick();}else{const u=pendingAdmin;pendingAdmin=null;closeModal();doEnter(u);}}else{$("#pinErr").textContent="קוד שגוי, נסה שוב";$("#pinInput").value="";$("#pinInput").focus();}}
 function adminPick(){pendingAdmin=null;const admins=USERS.filter(u=>u.admin);$("#modalBody").innerHTML=`<div class="mm">👑</div><h3>מי נכנס לניהול?</h3><div class="sub">בחר את עצמך כדי להיכנס לאישורים.</div><div style="display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap">${admins.map(a=>`<div class="ucard" style="cursor:pointer;min-width:120px;margin:0" onclick="closeModal();doEnter(USERS.find(x=>x.id==='${a.id}'))"><div class="av" style="background:${a.color}">${esc(initials(a.name))}</div><div class="nm">${esc(a.name)}</div><div class="role">👑 אדמין</div></div>`).join("")}</div><button class="skip" style="margin-top:14px" onclick="closeModal();renderLogin()">ביטול</button>`;}
-function logout(){state.me=null;save();renderLogin();showSplash();}
+function logout(){state.me=null;save();$("#login").style.display="none";showSplash();}
 function askLogout(){if(confirm("לצאת מהחשבון של "+(state.me?state.me.name:"")+" ולחזור למסך הבחירה?"))logout();}
 function updateWallet(){const u=state.me,w=$("#navWallet"),tc=$("#navTier");
   if(u&&!u.admin){w.style.display="flex";$("#navWalletC").textContent=nf(u.balance);const t=userTier(u);tc.style.display="flex";tc.className="navtier "+t.metal;tc.innerHTML=`<span class="em">${t.ico}</span> ${t.n}`;}
@@ -884,7 +900,7 @@ function maybeTempt(){const u=state.me;if(!u||u.admin||u.coach)return;const smal
     </div>
     <button class="skip" onclick="closeModal()">אחליט אחר כך</button>`;
   $("#modal").classList.add("show");}
-function closeModal(){$("#modal").classList.remove("show");}
+function closeModal(){if(_gating){chooseOrg();return;}$("#modal").classList.remove("show");}
 function temptRedeem(cost,name){closeModal();const u=state.me;if(!u||u.admin)return;syncFromStorage(u);if(u.balance>=cost){u.balance-=cost;(state.redemp[u.id]=state.redemp[u.id]||[]).push({id:newId(),rid:uid4(),name,cost,ts:Date.now(),status:"requested"});save();celebrate("🎁 בקשת מימוש נשלחה! בפעם הבאה אולי תחכה לגדול 😉");$("#v-prizes").classList.contains("hidden")?renderDash():renderPrizes();}}
 function temptWait(){closeModal();celebrate("💪 כבוד! סבלנות משתלמת - אתה בדרך לפסגה");}
 
