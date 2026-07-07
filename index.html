@@ -306,7 +306,7 @@
 </style>
 </head>
 <body>
-<div id="splash" onclick="dismissSplash()" style="display:none">
+<div id="splash" onclick="openGate()" style="display:none">
   <div class="splashInner">
     <img src="icon-512.png" alt="מועדון הפסגה" class="splashLogo" onerror="this.style.display='none'">
     <div class="splashTitle">מועדון הפסגה</div>
@@ -422,7 +422,7 @@ const TRIGGERS=[
 const MONTHS=["ינו","פבר","מרץ","אפר","מאי","יונ","יול","אוג","ספט","אוק","נוב","דצמ"];
 
 const state={me:null,logs:{},redemp:{},seq:0};
-const ADMIN_PIN="124456";const COACH_PIN="1244";let pendingAdmin=null;
+const ADMIN_PIN="124456";const COACH_PIN="1244";let pendingAdmin=null;const ORG_TTL=10*86400000;/* קוד הארגון תקף 10 ימים ואז נדרש שוב */
 const OVERRIDE=0.15;/* מנהל מחלקה צובר 15% מכל הישג מאושר של הצוות שלו - מנצח כשהצוות מנצח */
 const PT_ILS=0.17;/* שווי פרס מוצג למנהל (מנופח מעט מעל מחיר השוק - התלהבות + תפיסת ערך; העלות בפועל לחברה נמוכה יותר) */
 const CASH_KEEP=0.65;/* המרה לכסף במקום פרס = 65% מהשווי (ניכוי 35%) - עוגן פסיכולוגי, עדיף פרס */
@@ -551,8 +551,8 @@ let USERS=[];
   Object.values(state.logs).forEach(a=>(a||[]).forEach(l=>{if(l&&l.id>_mx)_mx=l.id}));Object.values(state.redemp).forEach(a=>(a||[]).forEach(r=>{if(r&&r.id>_mx)_mx=r.id}));state.seq=_mx;
   pullRemote(true);setInterval(()=>pullRemote(true),8000);/* Supabase: משיכה ראשונית + סנכרון כל 8 שניות */
   renderTicker();
-  const qp=new URLSearchParams(location.search).get("u");if(qp){const qu=USERS.find(x=>x.id===qp);if(qu)return enter(qu);}
-  if(saved.me){const u=USERS.find(x=>x.id===saved.me);if(u)return enter(u)}$("#login").style.display="none";showSplash();})();
+  if(orgValid()){const qp=new URLSearchParams(location.search).get("u");if(qp){const qu=USERS.find(x=>x.id===qp);if(qu)return enter(qu);}
+  if(saved.me){const u=USERS.find(x=>x.id===saved.me);if(u)return enter(u)}}$("#login").style.display="none";showSplash();})();
 
 function addUser(){
   const name=(prompt("שם מנהל הכספים החדש:")||"").trim().replace(/[<>"'`]/g,"").slice(0,40);
@@ -574,13 +574,14 @@ const ORGS=[
   {name:"Crestline Partners",active:false}
 ];
 let _gating=false;
-function startGate(){if(localStorage.getItem("orgOk")==="1"){renderLogin();return;}_gating=true;chooseOrg();}
+function orgValid(){const t=+localStorage.getItem("orgOk")||0;return t>0&&(Date.now()-t)<ORG_TTL;}
+function openGate(){if(orgValid()){dismissSplash();renderLogin();return;}_gating=true;$("#modal").style.zIndex="6500";chooseOrg();}
 function chooseOrg(){$("#modalBody").innerHTML=`<div class="mm">🏢</div><h3>בחר ארגון</h3><div class="sub">הפלטפורמה של מועדון הפסגה. בחר את הארגון שלך כדי להיכנס.</div><div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">${ORGS.map((o,i)=>`<button onclick="pickOrg(${i})" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-radius:12px;border:1.5px solid ${o.active?'#e0b53f':'var(--line)'};background:${o.active?'linear-gradient(135deg,#fffdf6,#fff6e0)':'#f7f9fc'};font-family:inherit;font-weight:800;font-size:14.5px;color:${o.active?'var(--ink)':'var(--muted)'};cursor:pointer">‏<span dir="ltr">${o.active?'⭐ ':''}${esc(o.name)}</span><span style="font-size:11.5px;color:${o.active?'var(--gold)':'var(--muted)'}">${o.active?'כניסה ←':'בקרוב'}</span></button>`).join("")}</div>`;$("#modal").classList.add("show");}
 function pickOrg(i){const o=ORGS[i];if(!o)return;if(!o.active){celebrate("🔒 "+o.name+" - בקרוב. הפלטפורמה נפתחת לארגונים נוספים.",1);return;}if(o.code){orgCodeScreen(i);}else{orgIn();}}
 function orgCodeScreen(i){const o=ORGS[i];$("#modalBody").innerHTML=`<div class="mm">🔒</div><h3 dir="ltr">${esc(o.name)}</h3><div class="sub">הזן את קוד ההתחברות למועדון:</div><input id="orgCode" type="text" autocomplete="off" autocapitalize="off" placeholder="קוד גישה" style="width:100%;margin-top:12px;padding:12px;border:1.5px solid var(--line);border-radius:12px;font:inherit;font-size:16px;text-align:center;letter-spacing:1px"><div id="orgCodeErr" style="display:none;color:var(--red);font-size:13px;font-weight:700;margin-top:6px">קוד שגוי, נסה שוב</div><button class="btn" style="max-width:230px;margin:12px auto 0" onclick="checkOrgCode(${i})">כניסה ←</button><button class="skip" onclick="chooseOrg()">← לרשימת הארגונים</button>`;$("#modal").classList.add("show");setTimeout(()=>{const e=$("#orgCode");if(e){e.focus();e.onkeydown=(ev)=>{if(ev.key==="Enter")checkOrgCode(i);};}},60);}
-function checkOrgCode(i){const o=ORGS[i],v=($("#orgCode").value||"").trim();if(v===o.code){localStorage.setItem("orgOk","1");orgIn();}else{const er=$("#orgCodeErr");if(er)er.style.display="block";const e=$("#orgCode");if(e){e.value="";e.focus();}}}
-function orgIn(){_gating=false;$("#modal").classList.remove("show");renderLogin();}
-function dismissSplash(){const s=$("#splash");if(s){s.classList.add("hide");setTimeout(()=>{s.style.display="none";startGate();},520);}}
+function checkOrgCode(i){const o=ORGS[i],v=($("#orgCode").value||"").trim();if(v===o.code){localStorage.setItem("orgOk",String(Date.now()));orgIn();}else{const er=$("#orgCodeErr");if(er)er.style.display="block";const e=$("#orgCode");if(e){e.value="";e.focus();}}}
+function orgIn(){_gating=false;$("#modal").classList.remove("show");$("#modal").style.zIndex="";dismissSplash();renderLogin();}
+function dismissSplash(){const s=$("#splash");if(s){s.classList.add("hide");setTimeout(()=>{s.style.display="none";},520);}}
 function showSplash(){const s=$("#splash");if(s){s.style.display="flex";s.classList.remove("hide");}}
 function renderLogin(){$("#nav").style.display="none";$("#app").style.display="none";$("#login").style.display="block";
   $("#userGrid").innerHTML=USERS.filter(u=>!u.admin).map(u=>{const t=userTier(u);
