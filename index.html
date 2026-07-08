@@ -882,7 +882,7 @@ function submitLog(){const u=state.me;if(!u||u.admin||u.coach)return;const t=TRI
   if(!client||!details){$("#lgErr").style.display="block";return;}
   const aR=t.k==="B_ref"?1:0,aS=(t.k==="A"||t.k==="A_p90"||t.k==="B_case")?1:0,aStars=t.k==="B_case"?1:0;
   (state.logs[u.id]=state.logs[u.id]||[]).push({id:newId(),type:t.k,short:t.label.split(" (")[0],pts:g,vvs:t.vvs,client,details,val,color:t.color,status:"pending",ts:Date.now(),tierAt:userTier(u).n,addedRefs:aR,addedStreak:aS,addedStars:aStars});
-  save();/* כלום לא נספר עד אישור - לא ארנק ולא VVS/דרגה/תחרות. מוצג כ"ממתין". */
+  sendPush("🔥 הזינו הישג חדש במועדון הפסגה!",u.name+" הזין/ה הישג חדש בשווי "+nf(g)+" נק'. מה איתך? 💪");save();/* כלום לא נספר עד אישור - לא ארנק ולא VVS/דרגה/תחרות. מוצג כ"ממתין". הפוש יוצא לכולם על כל הזנה (גם לפני אישור) ליצירת דחיפות */
   celebrate(t.k==="B_case"?"⭐ נשלח לאישור - כוכב בדרך!":t.k==="B_ref"?"🌱 הפניה נשלחה לאישור":"🔥 נשלח לאישור · +"+nf(g)+" נק' (ממתין)");switchView("dash");}
 
 /* ---- Marshmallow tempt popup ---- */
