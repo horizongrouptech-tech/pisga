@@ -487,7 +487,7 @@ async function enablePush(){if(!state.me){return;}if(!pushSupported()){alert("ה
     await fetch(SUPA_URL+"/rest/v1/push_subs",{method:"POST",headers:Object.assign({},SB_H,{"Prefer":"resolution=merge-duplicates,return=minimal"}),body:JSON.stringify({id,data:{subscription:j,user_id:state.me.id,name:state.me.name,ts:Date.now()}})});
     localStorage.setItem("pushOn_"+state.me.id,"1");closeModal();celebrate("🔔 התראות לטלפון הופעלו! גם כשהאפליקציה סגורה.");
   }catch(e){alert("שגיאה בהפעלת התראות: "+(e&&e.message||e));}}
-function sendPush(title,body){try{fetch(SUPA_URL+"/functions/v1/send-push",{method:"POST",headers:SB_H,body:JSON.stringify({title,body,url:"/"})}).catch(()=>{});}catch(e){}}
+function sendPush(title,body){try{fetch(SUPA_URL+"/functions/v1/send-push",{method:"POST",headers:SB_H,body:JSON.stringify({title,body,url:location.origin+location.pathname})}).catch(()=>{});}catch(e){}}
 let sbOnline=false,pushPending=false,pushTimer=null,pulling=false,curView="dash";
 function newId(){return Date.now()*1000+Math.floor(Math.random()*1000);}/* מזהה ייחודי-גלובלי לשורה - מונע התנגשות בין מכשירים */
 let _lastSig="",_lastBellN=0,_skipFormRestore=false;
