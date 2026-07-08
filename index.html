@@ -650,7 +650,7 @@ function claimAnnouncement(annId){const u=state.me;if(!u||u.admin||u.coach)retur
 function delAnnouncement(id){if(!state.me||!state.me.admin)return;const a=(state.anns||[]).find(x=>x.id===id);if(a){a.active=false;save();renderAdmin();}}
 function grantBonus(){if(!state.me||!state.me.admin)return;const uid=$("#gbUser").value;const pts=Math.round(+($("#gbPts").value||0));const reason=($("#gbReason").value||"").trim();const u=USERS.find(x=>x.id===uid);if(!u||!pts||pts<=0||!reason){$("#gbErr").style.display="block";return;}
   const l={id:newId(),type:"BONUS",short:"🎁 בונוס מיוחד",pts,vvs:true,client:"בונוס הנהלה",details:reason,val:"",color:"#9a6ff0",status:"approved",ts:Date.now(),tierAt:userTier(u).n,addedRefs:0,addedStreak:0,addedStars:0,approvedBy:state.me.id,approvedAt:Date.now()};
-  (state.logs[u.id]=state.logs[u.id]||[]).push(l);u.balance+=pts;u.career+=pts;save();celebrate("🎁 "+nf(pts)+" נק' בונוס ל"+u.name);_skipFormRestore=true;renderAdmin();}
+  (state.logs[u.id]=state.logs[u.id]||[]).push(l);u.balance+=pts;u.career+=pts;pushNews(u.id,"🎁","קיבלת בונוס!",nf(pts)+" נק' בונוס נכנסו לארנק שלך. "+reason);sendPush("🎁 בונוס במועדון הפסגה!",u.name+" קיבל/ה "+nf(pts)+" נק' בונוס 🔥");save();celebrate("🎁 "+nf(pts)+" נק' בונוס ל"+u.name+" · יצאה התראה לכולם");_skipFormRestore=true;renderAdmin();}
 
 document.querySelectorAll(".nav .tab").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
 function switchView(v){curView=v;document.querySelectorAll(".nav .tab").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
