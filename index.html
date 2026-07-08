@@ -937,7 +937,7 @@ function renderBoard(){$("#v-board").innerHTML=`<div class="sec"><div class="kic
   <div class="tabs"><button class="on" data-f="all" onclick="setF(this)">כל הפסגה</button><button data-f="A" onclick="setF(this)">מחלקה A</button><button data-f="B" onclick="setF(this)">מחלקה B</button></div>
   <div id="boardWrap"></div><div class="note" style="margin-top:16px">רק עליות מוצגות פומבית - אין תחתית טבלה, אין השפלה.</div></div></div>`;drawBoard();updateWallet();}
 function setF(b){document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("on"));b.classList.add("on");boardFilter=b.dataset.f;drawBoard();}
-function drawBoard(){let p=USERS.filter(u=>!u.admin&&!u.coach);if(boardFilter!=="all")p=p.filter(x=>x.dept===boardFilter);$("#boardWrap").innerHTML=leadTable(p);}
+function drawBoard(){let p=USERS.filter(u=>!u.admin&&!u.coach),co=USERS.filter(u=>!u.admin&&u.coach);if(boardFilter!=="all"){p=p.filter(x=>x.dept===boardFilter);co=co.filter(x=>x.dept===boardFilter);}$("#boardWrap").innerHTML=leadTable(p)+(co.length?`<div class="kick" style="margin-top:20px">מנהלי מחלקה</div><div class="muted" style="font-size:13px;margin-bottom:8px">צוברים 15% מכל הישג מאושר של הצוות - מנצחים כשהצוות מנצח.</div>${leadTable(co,true)}`:"");}
 function leadTable(players,coach){players=players.slice().sort((a,b)=>b.career-a.career);
   const star=risingStar();
   const rows=players.map((p,i)=>{const t=userTier(p),me=state.me&&p.id===state.me.id,tr=(monthsOf(p)<=2||i<3)?"up":"flat",isStar=star&&star.u.id===p.id;
