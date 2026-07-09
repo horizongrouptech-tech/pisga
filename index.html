@@ -488,6 +488,7 @@ async function enablePush(){if(!state.me){return;}if(!pushSupported()){alert("ה
     localStorage.setItem("pushOn_"+state.me.id,"1");closeModal();celebrate("🔔 התראות לטלפון הופעלו! גם כשהאפליקציה סגורה.");
   }catch(e){alert("שגיאה בהפעלת התראות: "+(e&&e.message||e));}}
 function sendPush(title,body){try{fetch(SUPA_URL+"/functions/v1/send-push",{method:"POST",headers:SB_H,body:JSON.stringify({title,body,url:location.origin+location.pathname})}).catch(()=>{});}catch(e){}}
+function sendPushUser(uid,title,body){try{fetch(SUPA_URL+"/functions/v1/push-user",{method:"POST",headers:SB_H,body:JSON.stringify({title,body,url:location.origin+location.pathname,user_id:uid})}).catch(()=>{});}catch(e){}}/* פוש אישי למשתמש ספציפי (edge fn push-user מסנן לפי user_id) */
 let sbOnline=false,pushPending=false,pushTimer=null,pulling=false,curView="dash";
 function newId(){return Date.now()*1000+Math.floor(Math.random()*1000);}/* מזהה ייחודי-גלובלי לשורה - מונע התנגשות בין מכשירים */
 let _lastSig="",_lastBellN=0,_skipFormRestore=false;
@@ -826,7 +827,7 @@ function approveLog(uid,id){const u=USERS.find(x=>x.id===uid),l=(state.logs[uid]
   if(!u.coach&&!u.admin){const co=USERS.find(x=>x.coach&&!x.admin&&x.dept===u.dept);if(co){co.overridePending=(co.overridePending||0)+Math.round(l.pts*OVERRIDE);}}
   /* ספר התחייבויות מזומן - נרשם אוטומטית על טריגר עם בונוס מזומן */
   const t=TRIGGERS.find(x=>x.k===l.type);if(t&&t.cash){(state.cashLedger=state.cashLedger||[]).push({id:newId(),rid:uid4(),trigger:l.type,short:l.short,amount:t.cash,cashto:t.cashto,forClient:l.client,byUser:u.id,approvedBy:state.me.id,ts:Date.now(),status:"pending_payout"});}
-  pushNews(uid,"✅","ההישג שלך אושר!","+"+nf(l.pts)+" נק' נכנסו לארנק. כל הכבוד!");save();celebrate("✓ אושר · "+nf(l.pts)+" נק' נכנסו לארנק");refreshApprovals();}
+  pushNews(uid,"✅","ההישג שלך אושר!","+"+nf(l.pts)+" נק' נכנסו לארנק. כל הכבוד!");sendPushUser(uid,"✅ ההישג שלך אושר!",(l.short||"הישג")+" · +"+nf(l.pts)+" נק' נכנסו לחשבון שלך 🏔️");save();celebrate("✓ אושר · "+nf(l.pts)+" נק' נכנסו לארנק");refreshApprovals();}
 function releaseOverride(coachId){if(!state.me||!state.me.admin)return;const co=USERS.find(x=>x.id===coachId);if(!co||!(co.overridePending>0))return;const ov=co.overridePending;co.balance+=ov;co.career+=ov;co.overrideEarned=(co.overrideEarned||0)+ov;co.overridePending=0;save();celebrate("✓ שוחרר אוברררייד "+nf(ov)+" נק' ל"+co.name);renderAdmin();}
 function markCashPaid(rid){if(!state.me||!state.me.admin)return;const r=(state.cashLedger||[]).find(x=>x.rid===rid);if(r&&r.status==="pending_payout"){r.status="paid";r.paidBy=state.me.id;r.paidAt=Date.now();save();renderAdmin();}}
 function rejectLog(uid,id){const u=USERS.find(x=>x.id===uid),l=(state.logs[uid]||[]).find(x=>x.id===id);if(!u||!l||l.status!=="pending"||!canApprove(u))return;
