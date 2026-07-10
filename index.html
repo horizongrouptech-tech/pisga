@@ -540,6 +540,9 @@ function monthPoints(uid,mk){mk=mk||curMonthKey();return approvedLogs(uid).filte
 function lastActivityTs(uid){const ls=state.logs[uid]||[];return ls.length?Math.max(...ls.map(l=>l.ts||0)):0;}
 function daysSince(ts){return ts?Math.floor((Date.now()-ts)/86400000):9999;}
 function weekIdx(ts){const d=new Date(ts);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return Math.floor(d.getTime()/604800000);}
+/* סטרייק - עקביות שבועית, נגזר מהלוגים, לדרייב בלבד (אפס נקודות/עלות) */
+function weekStreak(uid){const cw=weekIdx(Date.now());const wk={};(state.logs[uid]||[]).forEach(l=>{if(l.status==="approved")wk[weekIdx(l.approvedAt||l.ts||0)]=1;});let start=wk[cw]?cw:(wk[cw-1]?cw-1:null);if(start===null)return{n:0,now:false};let n=0,w=start;while(wk[w]){n++;w--;}return{n:n,now:!!wk[cw]};}
+function streakBadge(u){const s=weekStreak(u.id);if(s.n<1)return "";const risk=!s.now;const bd=risk?"#f0a35a":"#f2803a";const bg=risk?"linear-gradient(135deg,#fff6ee,#ffe9d6)":"linear-gradient(135deg,#fff0e6,#ffe0cc)";const msg=risk?`הרצף שלך (${s.n} ${s.n===1?"שבוע":"שבועות"}) בסכנה - תעד השבוע כדי לשמור עליו!`:(s.n===1?"התחלת רצף! תעד גם בשבוע הבא כדי לשמור עליו.":`${s.n} שבועות ברצף - עקביות שמנצחת!`);const ttl=risk?"🔥 שמור על הרצף":(s.n===1?"🔥 התחלת רצף":`🔥 רצף של ${s.n} שבועות`);return `<div class="sec" style="margin-top:12px"><div class="card" style="border:1.5px solid ${bd};background:${bg}"><div style="display:flex;align-items:center;gap:12px"><div style="font-size:30px;flex:none">🔥</div><div style="flex:1"><div style="font-weight:900;font-size:15.5px;color:var(--ink)">${ttl}</div><div class="muted" style="font-size:12.5px;color:#a05a2a">${msg}</div></div>${risk?`<button onclick="switchView('log')" style="background:${bd};color:#fff;border:none;border-radius:10px;padding:9px 13px;font-size:12.5px;font-weight:800;cursor:pointer;flex:none;white-space:nowrap">תעד ←</button>`:""}</div></div></div>`;}
 function weekStreak(uid){const wk=new Set(approvedLogs(uid).map(l=>weekIdx(l.ts)));if(!wk.size)return 0;const cur=weekIdx(Date.now());let w=wk.has(cur)?cur:cur-1,s=0;while(wk.has(w)){s++;w--;}return s;}
 function quarterKey(ts){const d=new Date(ts);return d.getFullYear()+"-Q"+(Math.floor(d.getMonth()/3)+1);}
 function curQuarterKey(){return quarterKey(Date.now());}
@@ -684,6 +687,7 @@ function renderDash(){const u=state.me;if(u.admin)return renderAdmin();if(u.coac
   $("#v-dash").innerHTML=`
   <div class="sec"><div class="kick">שלום ${esc(u.name)}</div><h1>המסע שלי</h1></div>
   ${nextStepCard(u)}
+  ${streakBadge(u)}
   <div class="sec grid g2">
     <div class="mcard ${t.metal}"><div class="medal">${medalSVG(t)}</div>
       <div class="top"><div class="prog">מועדון הפסגה</div><div class="chip"></div></div>
