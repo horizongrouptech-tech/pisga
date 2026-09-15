@@ -373,10 +373,8 @@ const SEED=[
   {id:"arik",name:"אריק",dept:"B",role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0},
   {id:"oshri",name:"אושרי",dept:"A",role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0},
   {id:"ido",name:"עידו",dept:"A",role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0},
-  {id:"tali",name:"טלי קבדה",dept:"B",role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0},
-  {id:"idon",name:"עידו נחום",dept:"B",role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0},
+  {id:"idon",name:"עידו נחום",dept:"A",role:"מנהל כספים",career:0,balance:0,stars:0,streak:0,refs:0},
   {id:"yorai",name:"יוראי מליח",dept:"A",role:"מנהל מחלקה A",career:0,balance:0,stars:0,streak:0,refs:0,coach:true,tierKey:"black"},
-  {id:"omer",name:"עומר בהר",dept:"B",role:"מנהל מחלקה B",career:0,balance:0,stars:0,streak:0,refs:0,coach:true,tierKey:"black"},
   {id:"ofek",name:"אופק",dept:"-",role:"בעלים / אדמין",career:0,balance:0,stars:0,streak:0,refs:0,admin:true},
   {id:"eliran",name:"אלירן אוחיון",dept:"-",role:"מייסד / אדמין",career:0,balance:0,stars:0,streak:0,refs:0,admin:true}
 ];
@@ -503,6 +501,7 @@ function stateRows(){const users=USERS.map(u=>({id:u.id,data:u}));const logs=[];
 async function pushRemote(){const R=stateRows();try{await Promise.all([sbUp("users",R.users),sbUp("logs",R.logs),sbUp("redemptions",R.reds),sbUp("cash_ledger",R.cash),sbUp("announcements",R.anns),sbUp("meta",[{k:"seq",v:state.seq}])]);sbOnline=true;pushPending=false;}catch(e){sbOnline=false;pushPending=true;clearTimeout(pushTimer);pushTimer=setTimeout(pushRemote,3000);/* שמירה נכשלה - שומר על השינוי המקומי ומנסה שוב, לא נותן ל-pull לדרוס */}}
 function schedulePush(){pushPending=true;clearTimeout(pushTimer);pushTimer=setTimeout(pushRemote,350);}
 function mergeRows(u,lg,rd,ch,an,mseq,rx){USERS=SEED.map((s,i)=>Object.assign({},s,{color:AV[i%AV.length]}));u.map(r=>r.data).forEach(su=>{const ex=USERS.find(x=>x.id===su.id);if(ex)Object.assign(ex,su);else USERS.push(su);});
+  USERS=USERS.filter(x=>["tali","mmrbea17wcpy","omer"].indexOf(x.id)<0);USERS.forEach(x=>{if(!x.admin&&!x.coach)x.dept="A";});/* כרגע: הוסרו tali/פלא תבל/omer, וכל מנהלי הכספים אוחדו תחת מחלקה A (של יוראי) */
   const lb={};lg.forEach(r=>lb[r.id]=Object.assign({},r.data));Object.keys(state.logs||{}).forEach(uid=>(state.logs[uid]||[]).forEach(l=>{const s=lb[l.id],dec=x=>x&&(x.status==="approved"||x.status==="rejected");if(!s||(dec(l)&&!dec(s))||(dec(l)&&dec(s)&&(l.approvedAt||0)>(s.approvedAt||0)))lb[l.id]=Object.assign({},l,{user_id:uid})}));/* decision-sticky: החלטה (אושר/נדחה) לעולם לא נמחקת ע"י גרסת pending ישנה - מונע חזרה לתור האישורים ואיפוס נקודות */const nl={};Object.values(lb).forEach(l=>{(nl[l.user_id]=nl[l.user_id]||[]).push(l)});Object.keys(nl).forEach(k=>nl[k].sort((a,b)=>a.id-b.id));state.logs=nl;
   const rb={};rd.forEach(r=>rb[r.id]=Object.assign({},r.data));Object.keys(state.redemp||{}).forEach(uid=>(state.redemp[uid]||[]).forEach(r=>{if(!rb[r.id])rb[r.id]=Object.assign({},r,{user_id:uid})}));const nr={};Object.values(rb).forEach(r=>{(nr[r.user_id]=nr[r.user_id]||[]).push(r)});state.redemp=nr;
   const cb={};ch.forEach(r=>cb[r.id]=Object.assign({},r.data));(state.cashLedger||[]).forEach(r=>{if(!cb[r.id])cb[r.id]=r});state.cashLedger=Object.values(cb);
@@ -928,7 +927,7 @@ function temptWait(){closeModal();celebrate("💪 כבוד! סבלנות משת�
 
 let boardFilter="all";
 function deptCount(dep){return USERS.filter(u=>!u.admin&&!u.coach&&u.dept===dep).length||1;}
-function deptVs(){const qk=curQuarterKey(),qLabel=qk.replace(/-Q(\d)/," · רבעון $1");const a=deptQ("A",qk),b=deptQ("B",qk),tot=a+b,ap=tot?a/tot*100:50;
+function deptVs(){return "";/* תחרות מחלקות מושבתת כרגע - מחלקה אחת. להחזרה: הסר את השורה הזו */const qk=curQuarterKey(),qLabel=qk.replace(/-Q(\d)/," · רבעון $1");const a=deptQ("A",qk),b=deptQ("B",qk),tot=a+b,ap=tot?a/tot*100:50;
   const aAvg=a/deptCount("A"),bAvg=b/deptCount("B"),lead=aAvg>=bAvg?"A · יוראי":"B · עומר",gap=Math.abs(a-b);/* ניקוד רבעוני, מנצח לפי ממוצע-לראש */
   let champ=null,cp=0;USERS.filter(u=>!u.admin&&!u.coach).forEach(u=>{const p=qPointsUser(u.id,qk);if(p>cp){cp=p;champ=u;}});
   const goal=90000,floor=30000,combined=a+b,gp=Math.min(100,combined/goal*100),bothOver=a>=floor&&b>=floor;
@@ -954,7 +953,6 @@ function renderBoard(){$("#v-board").innerHTML=`<div class="sec"><div class="kic
   ${deptVs()}
   <div class="sec"><div class="kick">תחרות אישית</div>
   <div class="muted" style="font-size:14px">דירוג לפי <b>VVS</b> - ערך מאומת בלבד (תוצאה ללקוח + מותג).</div>
-  <div class="tabs"><button class="on" data-f="all" onclick="setF(this)">כל הפסגה</button><button data-f="A" onclick="setF(this)">מחלקה A</button><button data-f="B" onclick="setF(this)">מחלקה B</button></div>
   <div id="boardWrap"></div><div class="note" style="margin-top:16px">רק עליות מוצגות פומבית - אין תחתית טבלה, אין השפלה.</div></div>
   <div class="sec"><div class="kick">עידוד הצוות 💪</div><div class="muted" style="font-size:13px;margin-bottom:2px">הישגים אחרונים של הצוות - לחצו לעודד 👏🔥💪</div><div id="teamFeed"></div></div></div>`;drawBoard();drawTeamFeed();updateWallet();}
 function setF(b){document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("on"));b.classList.add("on");boardFilter=b.dataset.f;drawBoard();}
